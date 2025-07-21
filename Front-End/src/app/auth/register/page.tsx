@@ -51,7 +51,8 @@ export default function RegisterPage() {
     }
 
     try {
-      const response = await fetch('/api/auth/register', {
+      const base = process.env.NEXT_PUBLIC_API_URL || '';
+      const response = await fetch(`${base}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
