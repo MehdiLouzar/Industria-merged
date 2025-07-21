@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,20 +16,54 @@ interface Zone {
   count?: number;
 }
 
+interface Feature {
+  geometry: { type: string; coordinates: [number, number] };
+  properties: { id: string; name: string; status: string };
+}
+
 export default function MapView() {
   const [selectedZone, setSelectedZone] = useState<Zone | null>(null);
   const [showLegend, setShowLegend] = useState(true);
   const [zoom, setZoom] = useState(1);
 
-  const zones: Zone[] = [
-    { id: '1', name: 'Zone Industrielle Casablanca Nord', type: 'industrial', status: 'available', x: 45, y: 35, count: 167 },
-    { id: '2', name: 'Parc Logistique Mohammedia', type: 'logistics', status: 'available', x: 55, y: 40, count: 99 },
-    { id: '3', name: 'Zone Franche Tanger', type: 'freeZone', status: 'reserved', x: 25, y: 15, count: 155 },
-    { id: '4', name: 'Zone Industrielle Berrechid', type: 'industrial', status: 'available', x: 50, y: 45, count: 2 },
-    { id: '5', name: 'Technopole Rabat', type: 'industrial', status: 'occupied', x: 35, y: 25, count: 43 },
-    { id: '6', name: 'Zone Industrielle Fès', type: 'industrial', status: 'available', x: 60, y: 30, count: 9 },
-    { id: '7', name: 'Parc Logistique Agadir', type: 'logistics', status: 'available', x: 30, y: 70, count: 5 },
-  ];
+const [zones, setZones] = useState<Zone[]>([]);
+
+  const mapStatus = (status: string): Zone['status'] => {
+    switch (status) {
+      case 'RESERVED':
+        return 'reserved';
+      case 'FULLY_OCCUPIED':
+        return 'occupied';
+      default:
+        return 'available';
+    }
+  };
+
+  useEffect(() => {
+    async function loadZones() {
+      const base = process.env.NEXT_PUBLIC_API_URL || '';
+      const res = await fetch(`${base}/api/map/zones`);
+      if (!res.ok) return;
+      const data: { features: Feature[] } = await res.json();
+      const loaded: Zone[] = data.features.map((f) => {
+        const [lon, lat] = f.geometry.coordinates;
+        // Simple transformation to map percentage positions
+        const x = ((lon + 9) / 18) * 100; // longitude range approx -9 to 9
+        const y = ((35 - lat) / 20) * 100; // latitude approx 25-35
+        return {
+          id: f.properties.id,
+          name: f.properties.name,
+          type: 'industrial',
+          status: mapStatus(f.properties.status),
+          x,
+          y,
+          count: undefined,
+        };
+      });
+      setZones(loaded);
+    }
+    loadZones();
+  }, []);
 
   const getZoneIcon = (type: Zone['type']) => {
     switch (type) {

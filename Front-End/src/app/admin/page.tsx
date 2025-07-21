@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,37 +19,12 @@ import {
 import Link from 'next/link';
 
 async function getAdminStats() {
-  const [
-    totalUsers,
-    totalZones,
-    totalParcels,
-    totalAppointments,
-    pendingAppointments,
-    availableParcels,
-    recentActivities
-  ] = await Promise.all([
-    prisma.user.count(),
-    prisma.zone.count(),
-    prisma.parcel.count(),
-    prisma.appointment.count(),
-    prisma.appointment.count({ where: { status: 'PENDING' } }),
-    prisma.parcel.count({ where: { status: 'AVAILABLE' } }),
-    prisma.activityLog.findMany({
-      take: 5,
-      orderBy: { createdAt: 'desc' },
-      include: { user: { select: { name: true, email: true } } }
-    })
-  ]);
-
-  return {
-    totalUsers,
-    totalZones,
-    totalParcels,
-    totalAppointments,
-    pendingAppointments,
-    availableParcels,
-    recentActivities
-  };
+  const base = process.env.NEXT_PUBLIC_API_URL || '';
+  const res = await fetch(`${base}/api/admin/stats`, { cache: 'no-store' });
+  if (!res.ok) {
+    throw new Error('Unable to load admin stats');
+  }
+  return res.json();
 }
 
 export default async function AdminDashboard() {
