@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Ruler, Factory, Calendar, Phone, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Ruler, Factory, Phone, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface IndustrialZone {
   id: string;
@@ -23,83 +23,52 @@ interface IndustrialZone {
 export default function ZoneGrid() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
+  const [zones, setZones] = useState<IndustrialZone[]>([]);
 
-  const zones: IndustrialZone[] = [
-    {
-      id: '1',
-      name: 'ZONE INDUSTRIELLE CASABLANCA NORD',
-      description: 'Une opportunité unique d\'investissement au cœur du pôle économique de Casablanca',
-      location: 'Casablanca',
-      area: 'De 1 200 m² à 15 000 m²',
-      price: 'À partir de 2 500 DH/m²',
-      type: 'Zone Industrielle',
-      status: 'Disponible',
-      image: 'https://ext.same-assets.com/2441009851/2254470735.jpeg',
-      features: ['Électricité', 'Eau', 'Assainissement', 'Routes', 'Télécommunications']
-    },
-    {
-      id: '2',
-      name: 'PARC LOGISTIQUE MOHAMMEDIA',
-      description: 'Infrastructure logistique moderne pour optimiser vos opérations',
-      location: 'Mohammedia',
-      area: 'De 2 000 m² à 25 000 m²',
-      price: 'À partir de 1 800 DH/m²',
-      type: 'Parc Logistique',
-      status: 'Nouveau',
-      deliveryDate: '05 Juin 2025',
-      image: 'https://ext.same-assets.com/2441009851/750331139.jpeg',
-      features: ['Entrepôts', 'Quais de chargement', 'Parking poids lourds', 'Sécurité 24h/24']
-    },
-    {
-      id: '3',
-      name: 'ZONE FRANCHE TANGER AUTOMOTIVE',
-      description: 'Zone spécialisée pour l\'industrie automobile avec tous les avantages fiscaux',
-      location: 'Tanger',
-      area: 'De 5 000 m² à 50 000 m²',
-      price: 'À partir de 3 200 DH/m²',
-      type: 'Zone Franche',
-      status: 'Disponible',
-      image: 'https://ext.same-assets.com/2441009851/2121535826.jpeg',
-      features: ['Exonération fiscale', 'Douane intégrée', 'Formation spécialisée', 'Services aux entreprises']
-    },
-    {
-      id: '4',
-      name: 'TECHNOPOLE RABAT INNOVATION',
-      description: 'Écosystème technologique moderne pour les entreprises innovantes',
-      location: 'Rabat',
-      area: 'De 500 m² à 8 000 m²',
-      price: 'À partir de 4 000 DH/m²',
-      type: 'Technopole',
-      status: 'En cours',
-      deliveryDate: '24 Juin 2025',
-      image: 'https://ext.same-assets.com/2441009851/2545738160.jpeg',
-      features: ['Fibre optique', 'Centres R&D', 'Incubateurs', 'Services numériques']
-    },
-    {
-      id: '5',
-      name: 'ZONE INDUSTRIELLE BERRECHID',
-      description: 'Positionnement stratégique entre Casablanca et Marrakech',
-      location: 'Berrechid',
-      area: 'De 800 m² à 12 000 m²',
-      price: 'À partir de 1 500 DH/m²',
-      type: 'Zone Industrielle',
-      status: 'Disponible',
-      image: 'https://ext.same-assets.com/2441009851/4145191152.jpeg',
-      features: ['Accès autoroutier', 'Transport ferroviaire', 'Main d\'œuvre qualifiée', 'Services de maintenance']
-    },
-    {
-      id: '6',
-      name: 'PARC AGRO-INDUSTRIEL MEKNES',
-      description: 'Zone spécialisée dans l\'industrie agroalimentaire',
-      location: 'Meknès',
-      area: 'De 1 500 m² à 20 000 m²',
-      price: 'À partir de 2 200 DH/m²',
-      type: 'Zone Agroalimentaire',
-      status: 'Nouveau',
-      image: 'https://ext.same-assets.com/2441009851/2254470735.jpeg',
-      features: ['Laboratoires qualité', 'Chambres froides', 'Certification HACCP', 'Transport frigorifique']
+  interface ZoneResponse {
+    id: string;
+    name: string;
+    description?: string;
+    totalArea?: number;
+    price?: number;
+    status: string;
+    region?: { name: string };
+    amenities?: { amenity: { name: string } }[];
+  }
+
+  const mapStatus = (status: string): IndustrialZone['status'] => {
+    switch (status) {
+      case 'RESERVED':
+        return 'Réservé';
+      case 'UNDER_DEVELOPMENT':
+      case 'PARTIALLY_OCCUPIED':
+        return 'En cours';
+      default:
+        return 'Disponible';
     }
-  ];
+  };
+
+  useEffect(() => {
+    async function load() {
+      const res = await fetch('/api/zones');
+      if (!res.ok) return;
+      const data: ZoneResponse[] = await res.json();
+      const mapped: IndustrialZone[] = data.map((z) => ({
+        id: z.id,
+        name: z.name,
+        description: z.description ?? '',
+        location: z.region?.name ?? '',
+        area: z.totalArea ? `${z.totalArea} m²` : '',
+        price: z.price ? `${z.price} DH/m²` : '',
+        type: 'Zone Industrielle',
+        status: mapStatus(z.status),
+        image: 'https://source.unsplash.com/featured/?industrial',
+        features: z.amenities?.map((a) => a.amenity.name) ?? [],
+      }));
+      setZones(mapped);
+    }
+    load();
+  }, []);
 
   const totalPages = Math.ceil(zones.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
