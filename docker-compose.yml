@@ -26,10 +26,17 @@ services:
       context: ./Back-End
       dockerfile: Dockerfile
     container_name: zones-backend
+    volumes:
+      # Monter le code source
+      - ./Back-End:/Back-End
+      # Exclure node_modules pour éviter les conflits
+      - /Back-End/node_modules
+      # Persister les modules Prisma
+      - backend_node_modules:/Back-End/node_modules
     ports:
       - "3001:3001"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - PORT=3001
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/industria
       - NEXTAUTH_URL=http://localhost:3000
@@ -38,8 +45,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # Attendre que la DB soit prête avant de démarrer
-    command: sh -c "sleep 5 && npx prisma db push --skip-generate && npm run start"
+    command: sh -c "npm install && npx prisma generate && npx prisma db push && npm run dev"
     networks:
       - zones-network
 
@@ -48,10 +54,17 @@ services:
       context: ./Front-End
       dockerfile: Dockerfile
     container_name: zones-frontend
+    volumes:
+      # Monter le code source
+      - ./Front-End:/app
+      # Exclure node_modules
+      - /app/node_modules
+      # Persister les node_modules
+      - frontend_node_modules:/app/node_modules
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - PORT=3000
       - HOSTNAME=0.0.0.0
       - NEXT_PUBLIC_API_URL=http://backend:3001
@@ -60,6 +73,7 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
+    command: sh -c "bun install && bun run dev"
     networks:
       - zones-network
 
@@ -83,3 +97,5 @@ networks:
 
 volumes:
   db_data:
+  backend_node_modules:
+  frontend_node_modules:
