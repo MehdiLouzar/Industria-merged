@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Ruler, Factory, Phone, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -156,9 +157,8 @@ export default function ZoneGrid() {
               </div>
 
               <div className="flex gap-2">
-                <Button size="sm" className="flex-1 header-red text-white hover:opacity-90">
-                  <Eye className="w-4 h-4 mr-1" />
-                  Voir
+                <Button asChild size="sm" className="flex-1 header-red text-white hover:opacity-90">
+                  <Link href={`/zones/${zone.id}`}> <Eye className="w-4 h-4 mr-1" /> Voir </Link>
                 </Button>
                 <Button variant="outline" size="sm" className="flex-1">
                   <Phone className="w-4 h-4 mr-1" />

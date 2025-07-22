@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { MapContainer, TileLayer, Marker, Popup, FeatureGroup } from 'react-leaflet'
 import { EditControl } from 'react-leaflet-draw'
 import type { LeafletEvent } from 'leaflet'
@@ -39,8 +40,11 @@ export default function MapView() {
       {zones.map(z => (
         <Marker key={z.properties.id} position={[z.geometry.coordinates[1], z.geometry.coordinates[0]]}>
           <Popup>
-            <strong>{z.properties.name}</strong>
-            <br />Statut: {z.properties.status}
+            <div className="space-y-1">
+              <strong>{z.properties.name}</strong>
+              <div>Statut: {z.properties.status}</div>
+              <Link href={`/zones/${z.properties.id}`} className="text-blue-600 underline">Voir la zone</Link>
+            </div>
           </Popup>
         </Marker>
       ))}
