@@ -40,3 +40,13 @@ docker compose up --build
 ```
 
 This starts PostgreSQL, the API backend on port 3001 and the front-end on port 3000. An optional Nginx proxy listens on port 80.
+
+### Manual database initialisation
+
+To execute the SQL script directly, run the helper inside `Back-End/scripts`:
+
+```bash
+cd Back-End
+export PGPASSWORD=postgres
+./scripts/run_initdb.sh
+```
