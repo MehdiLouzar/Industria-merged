@@ -1,0 +1,34 @@
+# ------------ 1) BUILD STAGE ----------------------------------------------
+FROM node:18-alpine AS builder
+
+# OpenSSL 1.1 requis par Prisma (paquet Alpine)
+RUN apk add --no-cache openssl1.1-compat
+
+WORKDIR /app
+
+# Copie minimale pour installer les deps (cache efficace)
+COPY package.json package-lock.json ./
+RUN npm ci         # + rapide & reproductible que "npm install"
+
+# Copie du code
+COPY . .
+
+# Copie explicite du dossier Prisma (si .dockerignore l’exclut)
+COPY prisma ./prisma
+
+# Génération du client Prisma
+RUN npx prisma generate --schema=./prisma/schema.prisma
+
+# Build de ton application (Next.js, Nest, Express TS, etc.)
+RUN npm run build
+
+# ------------ 2) RUNTIME STAGE --------------------------------------------
+FROM node:18-alpine AS runner
+RUN apk add --no-cache openssl1.1-compat
+WORKDIR /app
+
+# On ne copie que le résultat de la build (léger)
+COPY --from=builder /app .
+
+EXPOSE 3001
+CMD ["npm", "run", "start"]

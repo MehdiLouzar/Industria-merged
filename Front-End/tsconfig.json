@@ -1,3 +1,4 @@
+// Front-End/tsconfig.json
 {
   "compilerOptions": {
     "target": "ES2017",
@@ -16,7 +17,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "jsxImportSource": "same-runtime/dist",
     "incremental": true,
     "plugins": [
       {
@@ -33,9 +33,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "build/types/**/*.ts",
-    "next-env.d.ts",
-    "out/types/**/*.ts"
+    "next-env.d.ts"
   ],
   "exclude": [
     "node_modules"

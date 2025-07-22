@@ -1,8 +1,6 @@
+// Front-End/src/lib/auth.ts
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { prisma } from "@/lib/prisma"
-import bcrypt from "bcryptjs"
-import { UserRole } from "@prisma/client"
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -17,42 +15,27 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email
+        try {
+          // Appel à l'API backend pour l'authentification
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password
+            })
+          })
+
+          const data = await res.json()
+
+          if (res.ok && data.user) {
+            return data.user
           }
-        })
-
-        if (!user || !user.isActive) {
+          
           return null
-        }
-
-        const isValidPassword = await bcrypt.compare(
-          credentials.password,
-          user.password
-        )
-
-        if (!isValidPassword) {
+        } catch (error) {
+          console.error('Auth error:', error)
           return null
-        }
-
-        // Log connexion
-        await prisma.activityLog.create({
-          data: {
-            userId: user.id,
-            action: "LOGIN",
-            entity: "User",
-            entityId: user.id,
-            description: `Connexion réussie pour ${user.email}`
-          }
-        })
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          company: user.company,
-          role: user.role,
         }
       }
     })
@@ -71,7 +54,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token) {
         session.user.id = token.sub!
-        session.user.role = token.role as UserRole
+        session.user.role = token.role as string
         session.user.company = token.company as string
       }
       return session
@@ -91,19 +74,19 @@ declare module "next-auth" {
       email: string
       name?: string | null
       company?: string | null
-      role: UserRole
+      role: string
     }
   }
 
   interface User {
-    role: UserRole
+    role: string
     company?: string | null
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    role: UserRole
+    role: string
     company?: string | null
   }
 }
