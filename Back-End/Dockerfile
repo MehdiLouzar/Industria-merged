@@ -1,19 +1,24 @@
-# Back-End/Dockerfile
-FROM node:18-alpine AS base
-WORKDIR /app
+FROM node:18-alpine AS build-backend
 
-# Install dependencies
-COPY package.json ./
-RUN npm install
+# OpenSSL 1.1 indispensable à Prisma
+RUN apk add --no-cache openssl1.1-compat
 
-# Copy source
-COPY . .
+WORKDIR /Back-End
 
-# Generate Prisma Client
-RUN npx prisma generate
+# Installer les dépendances
+COPY package*.json ./
+RUN npm ci
 
-# Build Next.js app
-RUN npm run build
+# Générer le client Prisma
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
+# Construire l’app si nécessaire
+RUN npm run build       # retire si pas de step build côté back
+
+# ---- image d’exécution, plus légère ----
+FROM node:18-alpine AS backend
+RUN apk add --no-cache openssl1.1-compat
+WORKDIR /Back-End
+COPY --from=build-backend /Back-End .
 EXPOSE 3001
 CMD ["npm", "run", "start"]

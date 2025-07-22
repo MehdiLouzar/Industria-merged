@@ -16,15 +16,12 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma Client (nécessaire pour les imports)
-RUN bunx prisma generate
-
 # Build the application
 RUN bun run build
 
 # Production image
 FROM node:18-alpine AS runner
-WORKDIR /app
+WORKDIR /Front-End
 
 ENV NODE_ENV=production
 
@@ -35,10 +32,10 @@ RUN adduser --system --uid 1001 nextjs
 RUN npm install -g serve
 
 # Copy the built application
-COPY --from=builder /app/out ./out
+COPY --from=builder /Front-End/out ./out
 
 # Set the correct permission for the app directory
-RUN chown -R nextjs:nodejs /app
+RUN chown -R nextjs:nodejs /Front-End
 
 # Switch to nextjs user
 USER nextjs
