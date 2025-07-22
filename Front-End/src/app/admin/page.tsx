@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -20,7 +22,11 @@ import Link from 'next/link';
 
 async function getAdminStats() {
   const base = process.env.NEXT_PUBLIC_API_URL || '';
-  const res = await fetch(`${base}/api/admin/stats`, { cache: 'no-store' });
+  const res = await fetch(`${base}/api/admin/stats`, { 
+    cache: 'no-store',
+    // Ajouter un timeout pour éviter les blocages
+    next: { revalidate: 0 }
+  });
   if (!res.ok) {
     throw new Error('Unable to load admin stats');
   }
