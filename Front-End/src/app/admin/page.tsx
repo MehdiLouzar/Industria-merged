@@ -52,6 +52,30 @@ export default async function AdminDashboard() {
       permission: ['ADMIN', 'MANAGER']
     },
     {
+      title: 'Pays',
+      description: 'Gérer la liste des pays',
+      icon: MapPin,
+      href: '/admin/countries',
+      color: 'bg-lime-500',
+      permission: ['ADMIN']
+    },
+    {
+      title: 'Régions',
+      description: 'Gérer les régions',
+      icon: MapPin,
+      href: '/admin/regions',
+      color: 'bg-emerald-500',
+      permission: ['ADMIN']
+    },
+    {
+      title: 'Types de zone',
+      description: 'Catégories de zones',
+      icon: Factory,
+      href: '/admin/zone-types',
+      color: 'bg-teal-500',
+      permission: ['ADMIN']
+    },
+    {
       title: 'Gestion des Parcelles',
       description: 'Gérer les parcelles dans les zones',
       icon: MapPin,
@@ -79,8 +103,16 @@ export default async function AdminDashboard() {
       title: 'Activités & Équipements',
       description: 'Gérer les types d\'activités et équipements',
       icon: Settings,
-      href: '/admin/config',
+      href: '/admin/activities',
       color: 'bg-red-500',
+      permission: ['ADMIN']
+    },
+    {
+      title: 'Équipements',
+      description: 'Gérer les équipements disponibles',
+      icon: Settings,
+      href: '/admin/amenities',
+      color: 'bg-pink-500',
       permission: ['ADMIN']
     },
     {
