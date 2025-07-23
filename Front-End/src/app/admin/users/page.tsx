@@ -7,6 +7,13 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select'
 
 interface User {
   id: string
@@ -14,6 +21,8 @@ interface User {
   name: string
   role: string
 }
+
+const roles = ['ADMIN', 'MANAGER', 'USER']
 
 export default function UsersAdmin() {
   const { data: session } = useSession()
@@ -31,6 +40,10 @@ export default function UsersAdmin() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const handleRole = (value: string) => {
+    setForm({ ...form, role: value })
   }
 
   async function submit(e: React.FormEvent) {
@@ -86,7 +99,16 @@ export default function UsersAdmin() {
             </div>
             <div>
               <Label htmlFor="role">Rôle</Label>
-              <Input id="role" name="role" value={form.role} onChange={handleChange} />
+              <Select value={form.role} onValueChange={handleRole}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisir" />
+                </SelectTrigger>
+                <SelectContent>
+                  {roles.map((r) => (
+                    <SelectItem key={r} value={r}>{r}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="password">Mot de passe</Label>

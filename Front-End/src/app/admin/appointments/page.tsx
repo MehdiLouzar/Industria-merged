@@ -7,12 +7,21 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select'
 
 interface Appointment {
   id: string
   contactName: string
   status: string
 }
+
+const statuses = ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED']
 
 export default function AppointmentsAdmin() {
   const { data: session } = useSession()
@@ -30,6 +39,10 @@ export default function AppointmentsAdmin() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const handleStatus = (value: string) => {
+    setForm({ ...form, status: value })
   }
 
   async function submit(e: React.FormEvent) {
@@ -80,7 +93,16 @@ export default function AppointmentsAdmin() {
             </div>
             <div>
               <Label htmlFor="status">Statut</Label>
-              <Input id="status" name="status" value={form.status} onChange={handleChange} />
+              <Select value={form.status} onValueChange={handleStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisir" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statuses.map((s) => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button type="submit">{form.id ? 'Mettre à jour' : 'Créer'}</Button>
           </form>

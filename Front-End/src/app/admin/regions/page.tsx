@@ -7,6 +7,13 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select'
 
 interface Region {
   id: string
@@ -19,6 +26,7 @@ export default function RegionsAdmin() {
   const { data: session } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<Region[]>([])
+  const [countries, setCountries] = useState<{ id: string; name: string }[]>([])
   const [form, setForm] = useState<Region>({ id: '', name: '', code: '', countryId: '' })
 
   useEffect(() => {
@@ -28,13 +36,22 @@ export default function RegionsAdmin() {
   }, [session])
 
   async function load() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/regions`)
-    if (res.ok) setItems(await res.json())
+    const base = process.env.NEXT_PUBLIC_API_URL
+    const [r1, r2] = await Promise.all([
+      fetch(`${base}/api/regions`),
+      fetch(`${base}/api/countries`),
+    ])
+    if (r1.ok) setItems(await r1.json())
+    if (r2.ok) setCountries(await r2.json())
   }
   useEffect(() => { load() }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const handleCountry = (value: string) => {
+    setForm({ ...form, countryId: value })
   }
 
   async function submit(e: React.FormEvent) {
@@ -96,7 +113,16 @@ export default function RegionsAdmin() {
             </div>
             <div>
               <Label htmlFor="countryId">Pays</Label>
-              <Input id="countryId" name="countryId" value={form.countryId} onChange={handleChange} required />
+              <Select value={form.countryId} onValueChange={handleCountry}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisir" />
+                </SelectTrigger>
+                <SelectContent>
+                  {countries.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button type="submit">{form.id ? 'Mettre à jour' : 'Créer'}</Button>
           </form>

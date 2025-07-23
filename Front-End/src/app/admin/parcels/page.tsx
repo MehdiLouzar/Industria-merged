@@ -7,6 +7,13 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select'
 
 interface Parcel {
   id: string
@@ -15,22 +22,38 @@ interface Parcel {
   status: string
 }
 
+const statuses = ['AVAILABLE', 'RESERVED', 'OCCUPIED', 'SHOWROOM']
+
 export default function ParcelsAdmin() {
   const { data: session } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<Parcel[]>([])
+  const [zones, setZones] = useState<{ id: string; name: string }[]>([])
   const [form, setForm] = useState<Parcel>({ id: '', reference: '', zoneId: '', status: 'AVAILABLE' })
 
   useEffect(() => { if (session && session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') router.push('/auth/login') }, [session])
 
   async function load() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/parcels`)
-    if (res.ok) setItems(await res.json())
+    const base = process.env.NEXT_PUBLIC_API_URL
+    const [r1, r2] = await Promise.all([
+      fetch(`${base}/api/parcels`),
+      fetch(`${base}/api/zones`),
+    ])
+    if (r1.ok) setItems(await r1.json())
+    if (r2.ok) setZones(await r2.json())
   }
   useEffect(() => { load() }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const handleStatus = (value: string) => {
+    setForm({ ...form, status: value })
+  }
+
+  const handleZone = (value: string) => {
+    setForm({ ...form, zoneId: value })
   }
 
   async function submit(e: React.FormEvent) {
@@ -81,11 +104,29 @@ export default function ParcelsAdmin() {
             </div>
             <div>
               <Label htmlFor="zoneId">Zone</Label>
-              <Input id="zoneId" name="zoneId" value={form.zoneId} onChange={handleChange} required />
+              <Select value={form.zoneId} onValueChange={handleZone}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisir" />
+                </SelectTrigger>
+                <SelectContent>
+                  {zones.map((z) => (
+                    <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="status">Statut</Label>
-              <Input id="status" name="status" value={form.status} onChange={handleChange} />
+              <Select value={form.status} onValueChange={handleStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisir" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statuses.map((s) => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button type="submit">{form.id ? 'Mettre à jour' : 'Créer'}</Button>
           </form>
