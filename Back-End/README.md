@@ -14,6 +14,11 @@ npm run dev
 
 The server listens on port 3001 by default and connects to PostgreSQL using `DATABASE_URL`.
 
+### CORS
+
+API routes include a middleware that sets permissive CORS headers. Requests from the
+frontend running on `localhost:3000` therefore succeed without additional configuration.
+
 ## Populate the database with initDB.sql
 
 A helper script is provided to run the SQL file located in `db/init/initDB.sql`.

@@ -44,6 +44,7 @@ The front-end is built with `NEXT_PUBLIC_API_URL=http://localhost:3001` so your
 browser can reach the API directly on the host. When using Docker, the frontend
 server accesses the backend via `API_INTERNAL_URL=http://backend:3001`.
 An optional Nginx proxy listens on port 80.
+The backend sets CORS headers so the React app can call the API without extra configuration.
 
 ### Manual database initialisation
 
