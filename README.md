@@ -39,7 +39,10 @@ A `docker-compose.yml` file is provided at the repository root. After installing
 docker compose up --build
 ```
 
-This starts PostgreSQL, the API backend on port 3001 and the front-end on port 3000. An optional Nginx proxy listens on port 80.
+This starts PostgreSQL, the API backend on port 3001 and the front-end on port 3000.
+The front-end is built with `NEXT_PUBLIC_API_URL=http://localhost:3001` so your
+browser can reach the API directly on the host. An optional Nginx proxy listens
+on port 80.
 
 ### Manual database initialisation
 
