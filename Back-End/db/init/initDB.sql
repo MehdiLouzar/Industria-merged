@@ -4,6 +4,7 @@
 
 -- Vérifier que PostGIS est disponible
 CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Fonction pour vider les tables dans le bon ordre (respecting FK constraints)
 DO
@@ -13,7 +14,8 @@ DECLARE
   tables text[] := ARRAY[
     'zone_activities', 'parcel_amenities', 'appointments', 'parcels',
     'zones', 'zone_types', 'activities', 'amenities',
-    'appointment_status', 'regions', 'countries', 'activity_logs'
+    'appointment_status', 'regions', 'countries', 'activity_logs',
+    'users'
   ];
   tbl text;
 BEGIN
@@ -35,6 +37,17 @@ $$;
 INSERT INTO countries (id, name, code) VALUES
   (1, 'Maroc', 'MA')
 ON CONFLICT (id) DO NOTHING;
+
+-- Comptes utilisateur de démonstration
+INSERT INTO users (email, password, name, company, phone, role)
+VALUES
+  ('admin@zonespro.ma', '$2b$10$VQl88VBIZ6aR46F7Ju2sgO0LH8oTFbm0Mb8ayY1KeuU261EfwEnZS',
+   'Administrateur ZonesPro', 'ZonesPro Management', '+212 5 37 57 20 00', 'ADMIN'),
+  ('manager@zonespro.ma', '$2b$10$VQl88VBIZ6aR46F7Ju2sgO0LH8oTFbm0Mb8ayY1KeuU261EfwEnZS',
+   'Manager Commercial', 'ZonesPro Management', '+212 5 37 57 20 01', 'MANAGER'),
+  ('demo@entreprise.ma', '$2b$10$VQl88VBIZ6aR46F7Ju2sgO0LH8oTFbm0Mb8ayY1KeuU261EfwEnZS',
+   'Utilisateur Démo', 'Entreprise Démo SA', '+212 6 12 34 56 78', 'USER')
+ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO zone_types (id, name) VALUES
   (1, 'privée'),

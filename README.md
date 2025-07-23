@@ -53,6 +53,13 @@ export PGPASSWORD=postgres
 ```
 
 When using `docker compose`, the script will execute `psql` inside the `db` service.
+The SQL file now also creates demo users. Default logins are:
+
+```
+- admin@zonespro.ma / password123
+- manager@zonespro.ma / password123
+- demo@entreprise.ma / password123
+```
 You can also run the command manually:
 
 ```bash

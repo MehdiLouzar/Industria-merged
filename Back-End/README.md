@@ -27,3 +27,11 @@ connection parameters can be customised via `DB_HOST`, `DB_PORT`, `DB_USER` and
 export PGPASSWORD=postgres
 ./scripts/run_initdb.sh
 ```
+
+After running the script you can sign in with the following demo accounts:
+
+```
+- admin@zonespro.ma / password123
+- manager@zonespro.ma / password123
+- demo@entreprise.ma / password123
+```
