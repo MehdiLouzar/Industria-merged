@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -8,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Menu, Phone, MapPin, Building2 } from 'lucide-react';
 import AuthButton from '@/components/AuthButton';
 
-export default function Header() {
+export default function Header({ showAdminLink = false }: { showAdminLink?: boolean }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
@@ -114,7 +115,12 @@ export default function Header() {
             </NavigationMenu>
 
             {/* Authentication section */}
-            <div className="hidden md:flex">
+            <div className="hidden md:flex items-center gap-4">
+              {showAdminLink && (
+                <Link href="/admin" className="text-sm text-gray-700 hover:text-red-600">
+                  Dashboard admin
+                </Link>
+              )}
               <AuthButton />
             </div>
 
@@ -128,7 +134,16 @@ export default function Header() {
               <SheetContent side="right">
                 <div className="space-y-4 py-4">
                   {/* Mobile Auth */}
-                  <div className="pb-4 border-b">
+                  <div className="pb-4 border-b space-y-2">
+                    {showAdminLink && (
+                      <a
+                        href="/admin"
+                        className="block text-sm text-gray-600 hover:text-red-600"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Dashboard admin
+                      </a>
+                    )}
                     <AuthButton />
                   </div>
 

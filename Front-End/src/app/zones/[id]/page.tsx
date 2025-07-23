@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import ZoneMap from "@/components/ZoneMap";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import AppointmentForm from "@/components/AppointmentForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { getBaseUrl } from "@/lib/utils";
 
 interface Parcel {
@@ -39,6 +42,7 @@ export default function ZonePage() {
   const params = useParams();
   const { id } = params as { id: string };
   const [zone, setZone] = useState<Zone | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     fetch(`${getBaseUrl()}/api/zones/${id}`)
@@ -78,10 +82,20 @@ export default function ZonePage() {
           )}
         </CardContent>
         </Card>
+        <div className="text-right">
+          <Button onClick={() => setShowForm(true)}>Prendre rendez-vous</Button>
+        </div>
         <div className="pt-4">
           <ZoneMap zone={zone} />
         </div>
       </div>
+      <Footer />
+      {showForm && zone.parcels[0] && (
+        <AppointmentForm
+          parcel={{ id: zone.parcels[0].id, reference: zone.parcels[0].reference }}
+          onClose={() => setShowForm(false)}
+        />
+      )}
     </>
   );
 }
