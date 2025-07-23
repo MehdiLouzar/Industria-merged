@@ -7,6 +7,7 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 interface Amenity {
   id: string
@@ -20,6 +21,7 @@ export default function AmenitiesAdmin() {
   const { data: session } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<Amenity[]>([])
+  const [open, setOpen] = useState(false)
   const [form, setForm] = useState<Amenity>({
     id: '',
     name: '',
@@ -73,15 +75,24 @@ export default function AmenitiesAdmin() {
       icon: it.icon ?? '',
       category: it.category ?? '',
     })
+    setOpen(true)
   }
   async function del(id: string) {
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/amenities/${id}`, { method: 'DELETE' })
     load()
   }
 
+  function addNew() {
+    setForm({ id: '', name: '', description: '', icon: '', category: '' })
+    setOpen(true)
+  }
+
   return (
     <div className="p-4 space-y-6">
-      <h1 className="text-xl font-bold">Équipements</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-xl font-bold">Équipements</h1>
+        <Button onClick={addNew}>Ajouter</Button>
+      </div>
       <Card>
         <CardContent className="overflow-x-auto p-0">
           <table className="w-full text-sm">
@@ -112,9 +123,11 @@ export default function AmenitiesAdmin() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader><CardTitle>{form.id ? 'Modifier' : 'Nouvel équipement'}</CardTitle></CardHeader>
-        <CardContent>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{form.id ? 'Modifier' : 'Nouvel équipement'}</DialogTitle>
+          </DialogHeader>
           <form onSubmit={submit} className="space-y-4">
             <div>
               <Label htmlFor="name">Nom</Label>
@@ -134,8 +147,8 @@ export default function AmenitiesAdmin() {
             </div>
             <Button type="submit">{form.id ? 'Mettre à jour' : 'Créer'}</Button>
           </form>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -7,6 +7,7 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 interface Country {
   id: string
@@ -18,6 +19,7 @@ export default function CountriesAdmin() {
   const { data: session } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<Country[]>([])
+  const [open, setOpen] = useState(false)
   const [form, setForm] = useState<Country>({ id: '', name: '', code: '' })
 
   useEffect(() => {
@@ -57,6 +59,7 @@ export default function CountriesAdmin() {
 
   function edit(it: Country) {
     setForm(it)
+    setOpen(true)
   }
 
   async function del(id: string) {
@@ -64,9 +67,17 @@ export default function CountriesAdmin() {
     load()
   }
 
+  function addNew() {
+    setForm({ id: '', name: '', code: '' })
+    setOpen(true)
+  }
+
   return (
     <div className="p-4 space-y-6">
-      <h1 className="text-xl font-bold">Gestion des Pays</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-xl font-bold">Gestion des Pays</h1>
+        <Button onClick={addNew}>Ajouter</Button>
+      </div>
       <Card>
         <CardContent className="overflow-x-auto p-0">
           <table className="w-full text-sm">
@@ -95,11 +106,11 @@ export default function CountriesAdmin() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{form.id ? 'Modifier un pays' : 'Nouveau pays'}</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{form.id ? 'Modifier un pays' : 'Nouveau pays'}</DialogTitle>
+          </DialogHeader>
           <form onSubmit={submit} className="space-y-4">
             <div>
               <Label htmlFor="name">Nom</Label>
@@ -111,8 +122,8 @@ export default function CountriesAdmin() {
             </div>
             <Button type="submit">{form.id ? 'Mettre à jour' : 'Créer'}</Button>
           </form>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

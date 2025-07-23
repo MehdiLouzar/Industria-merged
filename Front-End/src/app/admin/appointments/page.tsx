@@ -7,6 +7,7 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
   Select,
   SelectTrigger,
@@ -33,6 +34,7 @@ export default function AppointmentsAdmin() {
   const { data: session } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<Appointment[]>([])
+  const [open, setOpen] = useState(false)
   const [parcels, setParcels] = useState<{ id: string; reference: string }[]>([])
   const [form, setForm] = useState<Appointment>({
     id: '',
@@ -123,15 +125,34 @@ export default function AppointmentsAdmin() {
       parcelId: it.parcelId ?? '',
       status: it.status,
     })
+    setOpen(true)
   }
   async function del(id: string) {
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/appointments/${id}`, { method: 'DELETE' })
     load()
   }
 
+  function addNew() {
+    setForm({
+      id: '',
+      contactName: '',
+      contactEmail: '',
+      contactPhone: '',
+      companyName: '',
+      message: '',
+      requestedDate: '',
+      parcelId: '',
+      status: 'PENDING',
+    })
+    setOpen(true)
+  }
+
   return (
     <div className="p-4 space-y-6">
-      <h1 className="text-xl font-bold">Rendez-vous</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-xl font-bold">Rendez-vous</h1>
+        <Button onClick={addNew}>Ajouter</Button>
+      </div>
       <Card>
         <CardContent className="overflow-x-auto p-0">
           <table className="w-full text-sm">
@@ -162,9 +183,11 @@ export default function AppointmentsAdmin() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader><CardTitle>{form.id ? 'Modifier' : 'Nouveau RDV'}</CardTitle></CardHeader>
-        <CardContent>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{form.id ? 'Modifier' : 'Nouveau RDV'}</DialogTitle>
+          </DialogHeader>
           <form onSubmit={submit} className="space-y-4">
             <div>
               <Label htmlFor="contactName">Contact</Label>
@@ -218,8 +241,8 @@ export default function AppointmentsAdmin() {
             </div>
             <Button type="submit">{form.id ? 'Mettre à jour' : 'Créer'}</Button>
           </form>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
