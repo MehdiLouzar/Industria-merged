@@ -6,6 +6,7 @@ import { authOptions } from '@/lib/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { getBaseUrl } from '@/lib/utils';
 import {
   Users,
   MapPin,
@@ -21,7 +22,7 @@ import {
 import Link from 'next/link';
 
 async function getAdminStats() {
-  const base = process.env.NEXT_PUBLIC_API_URL || '';
+  const base = getBaseUrl();
   const res = await fetch(`${base}/api/admin/stats`, { 
     cache: 'no-store',
     // Ajouter un timeout pour éviter les blocages

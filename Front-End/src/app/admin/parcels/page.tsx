@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { getBaseUrl } from '@/lib/utils'
 import {
   Select,
   SelectTrigger,
@@ -76,7 +77,7 @@ export default function ParcelsAdmin() {
   useEffect(() => { if (session && session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') router.push('/auth/login') }, [session])
 
   async function load() {
-    const base = process.env.NEXT_PUBLIC_API_URL
+    const base = getBaseUrl()
     const [r1, r2] = await Promise.all([
       fetch(`${base}/api/parcels`),
       fetch(`${base}/api/zones`),
@@ -164,13 +165,13 @@ export default function ParcelsAdmin() {
     }
 
     if (form.id) {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/parcels/${form.id}`, {
+      await fetch(`${getBaseUrl()}/api/parcels/${form.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
     } else {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/parcels`, {
+      await fetch(`${getBaseUrl()}/api/parcels`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -215,7 +216,7 @@ export default function ParcelsAdmin() {
     setOpen(true)
   }
   async function del(id: string) {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/parcels/${id}`, { method: 'DELETE' })
+    await fetch(`${getBaseUrl()}/api/parcels/${id}`, { method: 'DELETE' })
     load()
   }
 

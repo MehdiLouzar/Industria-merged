@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import ZoneMap from "@/components/ZoneMap";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getBaseUrl } from "@/lib/utils";
 
 interface Parcel {
   id: string;
@@ -39,7 +40,7 @@ export default function ZonePage() {
   const [zone, setZone] = useState<Zone | null>(null);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/zones/${id}`)
+    fetch(`${getBaseUrl()}/api/zones/${id}`)
       .then((r) => r.json())
       .then(setZone)
       .catch(console.error);

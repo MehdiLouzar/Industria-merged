@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { getBaseUrl } from '@/lib/utils'
 
 interface ZoneType {
   id: string
@@ -26,7 +27,7 @@ export default function ZoneTypesAdmin() {
   }, [session])
 
   async function load() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/zone-types`)
+    const res = await fetch(`${getBaseUrl()}/api/zone-types`)
     if (res.ok) setItems(await res.json())
   }
   useEffect(() => { load() }, [])
@@ -38,13 +39,13 @@ export default function ZoneTypesAdmin() {
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     if (form.id) {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/zone-types/${form.id}`, {
+      await fetch(`${getBaseUrl()}/api/zone-types/${form.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name })
       })
     } else {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/zone-types`, {
+      await fetch(`${getBaseUrl()}/api/zone-types`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name })
@@ -60,7 +61,7 @@ export default function ZoneTypesAdmin() {
   }
 
   async function del(id: string) {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/zone-types/${id}`, { method: 'DELETE' })
+    await fetch(`${getBaseUrl()}/api/zone-types/${id}`, { method: 'DELETE' })
     load()
   }
 

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { getBaseUrl } from '@/lib/utils'
 
 interface Country {
   id: string
@@ -29,7 +30,8 @@ export default function CountriesAdmin() {
   }, [session])
 
   async function load() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/countries`)
+    const base = getBaseUrl()
+    const res = await fetch(`${base}/api/countries`)
     if (res.ok) setItems(await res.json())
   }
   useEffect(() => { load() }, [])
@@ -41,13 +43,13 @@ export default function CountriesAdmin() {
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     if (form.id) {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/countries/${form.id}`, {
+      await fetch(`${getBaseUrl()}/api/countries/${form.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name, code: form.code })
       })
     } else {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/countries`, {
+      await fetch(`${getBaseUrl()}/api/countries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name, code: form.code })
@@ -63,7 +65,7 @@ export default function CountriesAdmin() {
   }
 
   async function del(id: string) {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/countries/${id}`, { method: 'DELETE' })
+    await fetch(`${getBaseUrl()}/api/countries/${id}`, { method: 'DELETE' })
     load()
   }
 

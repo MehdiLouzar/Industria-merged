@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { getBaseUrl } from '@/lib/utils'
 import {
   Select,
   SelectTrigger,
@@ -38,7 +39,7 @@ export default function RegionsAdmin() {
   }, [session])
 
   async function load() {
-    const base = process.env.NEXT_PUBLIC_API_URL
+    const base = getBaseUrl()
     const [r1, r2] = await Promise.all([
       fetch(`${base}/api/regions`),
       fetch(`${base}/api/countries`),
@@ -59,13 +60,13 @@ export default function RegionsAdmin() {
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     if (form.id) {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/regions/${form.id}`, {
+      await fetch(`${getBaseUrl()}/api/regions/${form.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name, code: form.code, countryId: form.countryId })
       })
     } else {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/regions`, {
+      await fetch(`${getBaseUrl()}/api/regions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name, code: form.code, countryId: form.countryId })
@@ -81,7 +82,7 @@ export default function RegionsAdmin() {
   }
 
   async function del(id: string) {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/regions/${id}`, { method: 'DELETE' })
+    await fetch(`${getBaseUrl()}/api/regions/${id}`, { method: 'DELETE' })
     load()
   }
 

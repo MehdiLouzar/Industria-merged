@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
+import { getBaseUrl } from '@/lib/utils'
 
 type GeoFeature = {
   geometry: { type: string; coordinates: [number, number] }
@@ -15,7 +16,7 @@ export default function MapView() {
   const [parcels, setParcels] = useState<GeoFeature[]>([])
 
   useEffect(() => {
-    const base = process.env.NEXT_PUBLIC_API_URL || ''
+    const base = getBaseUrl()
     fetch(`${base}/api/map/zones`).then(r => r.json()).then(d => setZones(d.features)).catch(console.error)
     fetch(`${base}/api/map/parcels`).then(r => r.json()).then(d => setParcels(d.features)).catch(console.error)
   }, [])

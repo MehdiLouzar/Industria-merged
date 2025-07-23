@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Ruler, Factory, Phone, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { getBaseUrl } from '@/lib/utils';
 
 interface IndustrialZone {
   id: string;
@@ -51,7 +52,7 @@ export default function ZoneGrid() {
 
   useEffect(() => {
     async function load() {
-      const base = process.env.NEXT_PUBLIC_API_URL || '';
+      const base = getBaseUrl();
       const res = await fetch(`${base}/api/zones`);
       if (!res.ok) return;
       const data: ZoneResponse[] = await res.json();

@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { getBaseUrl } from '@/lib/utils'
 
 interface Parcel {
   id: string
@@ -19,7 +20,7 @@ export default function AppointmentForm({ parcel, onClose }: { parcel: Parcel; o
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/appointments`, {
+    await fetch(`${getBaseUrl()}/api/appointments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contactName, contactEmail, message, parcelId: parcel.id })

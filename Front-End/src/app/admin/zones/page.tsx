@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { getBaseUrl } from '@/lib/utils'
 import {
   Select,
   SelectTrigger,
@@ -104,7 +105,7 @@ export default function ZonesAdmin() {
   }, [session])
 
   async function load() {
-    const base = process.env.NEXT_PUBLIC_API_URL
+    const base = getBaseUrl()
     const [r1, r2, r3, r4, r5] = await Promise.all([
       fetch(`${base}/api/zones`),
       fetch(`${base}/api/zone-types`),
@@ -224,13 +225,13 @@ export default function ZonesAdmin() {
       })),
     }
     if (form.id) {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/zones/${form.id}`, {
+      await fetch(`${getBaseUrl()}/api/zones/${form.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
     } else {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/zones`, {
+      await fetch(`${getBaseUrl()}/api/zones`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -285,7 +286,7 @@ export default function ZonesAdmin() {
   }
 
   async function del(id: string) {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/zones/${id}`, { method: 'DELETE' })
+    await fetch(`${getBaseUrl()}/api/zones/${id}`, { method: 'DELETE' })
     load()
   }
 

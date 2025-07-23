@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { getBaseUrl } from '@/lib/utils'
 import {
   Select,
   SelectTrigger,
@@ -51,7 +52,7 @@ export default function AppointmentsAdmin() {
   useEffect(() => { if (session && session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') router.push('/auth/login') }, [session])
 
   async function load() {
-    const base = process.env.NEXT_PUBLIC_API_URL
+    const base = getBaseUrl()
     const [r1, r2] = await Promise.all([
       fetch(`${base}/api/appointments`),
       fetch(`${base}/api/parcels`),
@@ -87,13 +88,13 @@ export default function AppointmentsAdmin() {
     }
 
     if (form.id) {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/appointments/${form.id}`, {
+      await fetch(`${getBaseUrl()}/api/appointments/${form.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
     } else {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/appointments`, {
+      await fetch(`${getBaseUrl()}/api/appointments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -128,7 +129,7 @@ export default function AppointmentsAdmin() {
     setOpen(true)
   }
   async function del(id: string) {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/appointments/${id}`, { method: 'DELETE' })
+    await fetch(`${getBaseUrl()}/api/appointments/${id}`, { method: 'DELETE' })
     load()
   }
 

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { getBaseUrl } from '@/lib/utils'
 
 interface Amenity {
   id: string
@@ -33,7 +34,8 @@ export default function AmenitiesAdmin() {
   useEffect(() => { if (session && session.user.role !== 'ADMIN') router.push('/auth/login') }, [session])
 
   async function load() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/amenities`)
+    const base = getBaseUrl()
+    const res = await fetch(`${base}/api/amenities`)
     if (res.ok) setItems(await res.json())
   }
   useEffect(() => { load() }, [])
@@ -51,13 +53,13 @@ export default function AmenitiesAdmin() {
       category: form.category || undefined,
     }
     if (form.id) {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/amenities/${form.id}`, {
+      await fetch(`${getBaseUrl()}/api/amenities/${form.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
     } else {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/amenities`, {
+      await fetch(`${getBaseUrl()}/api/amenities`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -78,7 +80,7 @@ export default function AmenitiesAdmin() {
     setOpen(true)
   }
   async function del(id: string) {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/amenities/${id}`, { method: 'DELETE' })
+    await fetch(`${getBaseUrl()}/api/amenities/${id}`, { method: 'DELETE' })
     load()
   }
 
