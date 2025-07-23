@@ -18,8 +18,27 @@ import {
 interface Parcel {
   id: string
   reference: string
-  zoneId: string
+  area?: number | null
+  price?: number | null
   status: string
+  latitude?: number | null
+  longitude?: number | null
+  lambertX?: number | null
+  lambertY?: number | null
+  zoneId: string
+}
+
+interface ParcelForm {
+  id: string
+  reference: string
+  area: string
+  price: string
+  status: string
+  latitude: string
+  longitude: string
+  lambertX: string
+  lambertY: string
+  zoneId: string
 }
 
 const statuses = ['AVAILABLE', 'RESERVED', 'OCCUPIED', 'SHOWROOM']
@@ -29,7 +48,18 @@ export default function ParcelsAdmin() {
   const router = useRouter()
   const [items, setItems] = useState<Parcel[]>([])
   const [zones, setZones] = useState<{ id: string; name: string }[]>([])
-  const [form, setForm] = useState<Parcel>({ id: '', reference: '', zoneId: '', status: 'AVAILABLE' })
+  const [form, setForm] = useState<ParcelForm>({
+    id: '',
+    reference: '',
+    area: '',
+    price: '',
+    status: 'AVAILABLE',
+    latitude: '',
+    longitude: '',
+    lambertX: '',
+    lambertY: '',
+    zoneId: ''
+  })
 
   useEffect(() => { if (session && session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') router.push('/auth/login') }, [session])
 
@@ -58,20 +88,61 @@ export default function ParcelsAdmin() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
+    const body = {
+      reference: form.reference,
+      area: form.area ? parseFloat(form.area) : undefined,
+      price: form.price ? parseFloat(form.price) : undefined,
+      status: form.status,
+      latitude: form.latitude ? parseFloat(form.latitude) : undefined,
+      longitude: form.longitude ? parseFloat(form.longitude) : undefined,
+      lambertX: form.lambertX ? parseFloat(form.lambertX) : undefined,
+      lambertY: form.lambertY ? parseFloat(form.lambertY) : undefined,
+      zoneId: form.zoneId,
+    }
+
     if (form.id) {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/parcels/${form.id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reference: form.reference, zoneId: form.zoneId, status: form.status })
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       })
     } else {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/parcels`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reference: form.reference, zoneId: form.zoneId, status: form.status })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       })
     }
-    setForm({ id: '', reference: '', zoneId: '', status: 'AVAILABLE' })
+
+    setForm({
+      id: '',
+      reference: '',
+      area: '',
+      price: '',
+      status: 'AVAILABLE',
+      latitude: '',
+      longitude: '',
+      lambertX: '',
+      lambertY: '',
+      zoneId: '',
+    })
     load()
   }
 
-  function edit(it: Parcel) { setForm(it) }
+  function edit(it: Parcel) {
+    setForm({
+      id: it.id,
+      reference: it.reference,
+      area: it.area?.toString() ?? '',
+      price: it.price?.toString() ?? '',
+      status: it.status,
+      latitude: it.latitude?.toString() ?? '',
+      longitude: it.longitude?.toString() ?? '',
+      lambertX: it.lambertX?.toString() ?? '',
+      lambertY: it.lambertY?.toString() ?? '',
+      zoneId: it.zoneId,
+    })
+  }
   async function del(id: string) {
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/parcels/${id}`, { method: 'DELETE' })
     load()
@@ -101,6 +172,36 @@ export default function ParcelsAdmin() {
             <div>
               <Label htmlFor="reference">Référence</Label>
               <Input id="reference" name="reference" value={form.reference} onChange={handleChange} required />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="area">Surface m²</Label>
+                <Input id="area" name="area" value={form.area} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="price">Prix</Label>
+                <Input id="price" name="price" value={form.price} onChange={handleChange} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="latitude">Latitude</Label>
+                <Input id="latitude" name="latitude" value={form.latitude} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="longitude">Longitude</Label>
+                <Input id="longitude" name="longitude" value={form.longitude} onChange={handleChange} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="lambertX">Lambert X</Label>
+                <Input id="lambertX" name="lambertX" value={form.lambertX} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="lambertY">Lambert Y</Label>
+                <Input id="lambertY" name="lambertY" value={form.lambertY} onChange={handleChange} />
+              </div>
             </div>
             <div>
               <Label htmlFor="zoneId">Zone</Label>

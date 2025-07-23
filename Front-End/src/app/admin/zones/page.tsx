@@ -18,9 +18,35 @@ import {
 interface Zone {
   id: string
   name: string
+  description?: string | null
+  address?: string | null
+  totalArea?: number | null
+  price?: number | null
   status: string
-  zoneTypeId?: string
-  regionId?: string
+  latitude?: number | null
+  longitude?: number | null
+  lambertX?: number | null
+  lambertY?: number | null
+  zoneTypeId?: string | null
+  regionId?: string | null
+  activities?: { activityId: string }[]
+  amenities?: { amenityId: string }[]
+}
+
+interface ZoneForm {
+  id: string
+  name: string
+  description: string
+  address: string
+  totalArea: string
+  price: string
+  status: string
+  latitude: string
+  longitude: string
+  lambertX: string
+  lambertY: string
+  zoneTypeId: string
+  regionId: string
   activityIds: string[]
   amenityIds: string[]
 }
@@ -41,10 +67,18 @@ export default function ZonesAdmin() {
   const [regions, setRegions] = useState<{ id: string; name: string }[]>([])
   const [activities, setActivities] = useState<{ id: string; name: string }[]>([])
   const [amenities, setAmenities] = useState<{ id: string; name: string }[]>([])
-  const [form, setForm] = useState<Zone>({
+  const [form, setForm] = useState<ZoneForm>({
     id: '',
     name: '',
+    description: '',
+    address: '',
+    totalArea: '',
+    price: '',
     status: 'AVAILABLE',
+    latitude: '',
+    longitude: '',
+    lambertX: '',
+    lambertY: '',
     zoneTypeId: '',
     regionId: '',
     activityIds: [],
@@ -112,7 +146,15 @@ export default function ZonesAdmin() {
     e.preventDefault()
     const body = {
       name: form.name,
+      description: form.description || undefined,
+      address: form.address || undefined,
+      totalArea: form.totalArea ? parseFloat(form.totalArea) : undefined,
+      price: form.price ? parseFloat(form.price) : undefined,
       status: form.status,
+      latitude: form.latitude ? parseFloat(form.latitude) : undefined,
+      longitude: form.longitude ? parseFloat(form.longitude) : undefined,
+      lambertX: form.lambertX ? parseFloat(form.lambertX) : undefined,
+      lambertY: form.lambertY ? parseFloat(form.lambertY) : undefined,
       zoneTypeId: form.zoneTypeId || undefined,
       regionId: form.regionId || undefined,
       activityIds: form.activityIds,
@@ -134,7 +176,15 @@ export default function ZonesAdmin() {
     setForm({
       id: '',
       name: '',
+      description: '',
+      address: '',
+      totalArea: '',
+      price: '',
       status: 'AVAILABLE',
+      latitude: '',
+      longitude: '',
+      lambertX: '',
+      lambertY: '',
       zoneTypeId: '',
       regionId: '',
       activityIds: [],
@@ -147,7 +197,15 @@ export default function ZonesAdmin() {
     setForm({
       id: z.id,
       name: z.name,
+      description: z.description ?? '',
+      address: z.address ?? '',
+      totalArea: z.totalArea?.toString() ?? '',
+      price: z.price?.toString() ?? '',
       status: z.status,
+      latitude: z.latitude?.toString() ?? '',
+      longitude: z.longitude?.toString() ?? '',
+      lambertX: z.lambertX?.toString() ?? '',
+      lambertY: z.lambertY?.toString() ?? '',
       zoneTypeId: z.zoneTypeId || '',
       regionId: z.regionId || '',
       activityIds: z.activities ? z.activities.map(a => a.activityId) : [],
@@ -186,6 +244,44 @@ export default function ZonesAdmin() {
             <div>
               <Label htmlFor="name">Nom</Label>
               <Input id="name" name="name" value={form.name} onChange={handleChange} required />
+            </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Input id="description" name="description" value={form.description} onChange={handleChange} />
+            </div>
+            <div>
+              <Label htmlFor="address">Adresse</Label>
+              <Input id="address" name="address" value={form.address} onChange={handleChange} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="totalArea">Superficie m²</Label>
+                <Input id="totalArea" name="totalArea" value={form.totalArea} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="price">Prix DH/m²</Label>
+                <Input id="price" name="price" value={form.price} onChange={handleChange} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="latitude">Latitude</Label>
+                <Input id="latitude" name="latitude" value={form.latitude} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="longitude">Longitude</Label>
+                <Input id="longitude" name="longitude" value={form.longitude} onChange={handleChange} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="lambertX">Lambert X</Label>
+                <Input id="lambertX" name="lambertX" value={form.lambertX} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="lambertY">Lambert Y</Label>
+                <Input id="lambertY" name="lambertY" value={form.lambertY} onChange={handleChange} />
+              </div>
             </div>
             <div>
               <Label htmlFor="status">Statut</Label>
