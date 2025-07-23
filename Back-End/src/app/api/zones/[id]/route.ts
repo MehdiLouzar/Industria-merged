@@ -7,11 +7,12 @@ export async function GET(
   const zone = await prisma.zone.findUnique({
     where: { id: params.id },
     include: {
-      parcels: true,
+      parcels: { include: { vertices: true } },
       region: true,
       zoneType: true,
       activities: { include: { activity: true } },
       amenities: { include: { amenity: true } },
+      vertices: true,
     },
   });
 
@@ -28,7 +29,22 @@ export async function PUT(
 ) {
   try {
     const data = await req.json();
-    const zone = await prisma.zone.update({ where: { id: params.id }, data });
+    const { vertices, ...zoneData } = data;
+
+    await prisma.zone.update({ where: { id: params.id }, data: zoneData });
+
+    if (Array.isArray(vertices)) {
+      await prisma.zoneVertex.deleteMany({ where: { zoneId: params.id } });
+      await prisma.zoneVertex.createMany({
+        data: vertices.map((v: any) => ({ ...v, zoneId: params.id })),
+      });
+    }
+
+    const zone = await prisma.zone.findUnique({
+      where: { id: params.id },
+      include: { vertices: true, parcels: { include: { vertices: true } } },
+    });
+
     return Response.json(zone);
   } catch (error) {
     return new Response('Invalid data', { status: 400 });

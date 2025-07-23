@@ -1,14 +1,23 @@
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  const items = await prisma.parcel.findMany();
+  const items = await prisma.parcel.findMany({ include: { vertices: true } });
   return Response.json(items);
 }
 
 export async function POST(req: Request) {
   try {
     const data = await req.json();
-    const item = await prisma.parcel.create({ data });
+    const { vertices, ...parcelData } = data;
+    const item = await prisma.parcel.create({
+      data: {
+        ...parcelData,
+        vertices: vertices && Array.isArray(vertices)
+          ? { createMany: { data: vertices } }
+          : undefined,
+      },
+      include: { vertices: true },
+    });
     return Response.json(item, { status: 201 });
   } catch {
     return new Response('Invalid data', { status: 400 });

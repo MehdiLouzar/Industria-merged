@@ -13,6 +13,7 @@ interface Parcel {
   longitude: number | null;
   area?: number | null;
   price?: number | null;
+  vertices?: { seq: number; lambertX: number; lambertY: number }[];
 }
 
 interface Zone {
@@ -29,6 +30,7 @@ interface Zone {
   activities?: { activity: { name: string } }[];
   amenities?: { amenity: { name: string } }[];
   parcels: Parcel[];
+  vertices?: { seq: number; lambertX: number; lambertY: number }[];
 }
 
 export default function ZonePage() {
