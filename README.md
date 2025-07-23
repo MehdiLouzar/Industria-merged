@@ -60,6 +60,9 @@ The SQL file now also creates demo users. Default logins are:
 - manager@zonespro.ma / password123
 - demo@entreprise.ma / password123
 ```
+Lambert polygon points are inserted into `zone_vertices` and `parcel_vertices`
+to allow drawing shapes for zones and parcels.
+
 You can also run the command manually:
 
 ```bash

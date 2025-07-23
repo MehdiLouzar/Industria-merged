@@ -4,10 +4,26 @@
 CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+-- Optional tables to store Lambert coordinates for drawing polygons
+CREATE TABLE IF NOT EXISTS zone_vertices (
+  zone_id TEXT NOT NULL REFERENCES zones(id) ON DELETE CASCADE,
+  seq INT NOT NULL,
+  lambertX FLOAT NOT NULL,
+  lambertY FLOAT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS parcel_vertices (
+  parcel_id TEXT NOT NULL REFERENCES parcels(id) ON DELETE CASCADE,
+  seq INT NOT NULL,
+  lambertX FLOAT NOT NULL,
+  lambertY FLOAT NOT NULL
+);
+
 -- Clean tables in order
 DO $$
 DECLARE
   tables text[] := ARRAY[
+    'zone_vertices', 'parcel_vertices',
     'zone_activities', 'parcel_amenities', 'appointments', 'parcels',
     'zones', 'zone_types', 'activities', 'amenities',
     'regions', 'countries', 'activity_logs', 'users'
@@ -89,6 +105,25 @@ INSERT INTO parcels (
   ('parcel-1', 'CAS-001', 10000, 2500, 'AVAILABLE', 33.617, -7.615, 423457, 372891, 'zone-demo', NOW(), NOW()),
   ('parcel-2', 'CAS-002', 12000, 2500, 'RESERVED', 33.618, -7.616, 423458, 372892, 'zone-demo', NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
+
+-- Lambert polygon vertices for the demo zone
+INSERT INTO zone_vertices (zone_id, seq, lambertX, lambertY) VALUES
+  ('zone-demo', 1, 423400, 372800),
+  ('zone-demo', 2, 423600, 372800),
+  ('zone-demo', 3, 423600, 373000),
+  ('zone-demo', 4, 423400, 373000)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO parcel_vertices (parcel_id, seq, lambertX, lambertY) VALUES
+  ('parcel-1', 1, 423450, 372880),
+  ('parcel-1', 2, 423480, 372880),
+  ('parcel-1', 3, 423480, 372910),
+  ('parcel-1', 4, 423450, 372910),
+  ('parcel-2', 1, 423500, 372890),
+  ('parcel-2', 2, 423530, 372890),
+  ('parcel-2', 3, 423530, 372920),
+  ('parcel-2', 4, 423500, 372920)
+ON CONFLICT DO NOTHING;
 
 -- Link activities and amenities to the zone
 INSERT INTO zone_activities (id, "zoneId", "activityId") VALUES

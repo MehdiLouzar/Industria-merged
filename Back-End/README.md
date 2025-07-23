@@ -35,3 +35,6 @@ After running the script you can sign in with the following demo accounts:
 - manager@zonespro.ma / password123
 - demo@entreprise.ma / password123
 ```
+The SQL file also fills `zone_vertices` and `parcel_vertices` with Lambert
+coordinates so polygons can be drawn for each zone and parcel.
+
