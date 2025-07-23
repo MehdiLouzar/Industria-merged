@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import ZoneMap from "@/components/ZoneMap";
+import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getBaseUrl } from "@/lib/utils";
 
@@ -49,12 +50,14 @@ export default function ZonePage() {
   if (!zone) return <p className="p-4">Chargement...</p>;
 
   return (
-    <div className="p-4 space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{zone.name}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm">
+    <>
+      <Header />
+      <div className="p-4 space-y-6 max-w-5xl mx-auto">
+        <Card className="shadow">
+          <CardHeader>
+            <CardTitle>{zone.name}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm leading-relaxed">
           {zone.description && <p>{zone.description}</p>}
           <p className="text-muted-foreground">Statut: {zone.status}</p>
           {zone.region?.name && <p>Région: {zone.region.name}</p>}
@@ -74,8 +77,11 @@ export default function ZonePage() {
             </p>
           )}
         </CardContent>
-      </Card>
-      <ZoneMap zone={zone} />
-    </div>
+        </Card>
+        <div className="pt-4">
+          <ZoneMap zone={zone} />
+        </div>
+      </div>
+    </>
   );
 }
