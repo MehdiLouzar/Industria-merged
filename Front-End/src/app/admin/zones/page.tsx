@@ -15,6 +15,12 @@ import {
   SelectItem,
 } from '@/components/ui/select'
 
+interface Vertex {
+  seq: number
+  lambertX: number
+  lambertY: number
+}
+
 interface Zone {
   id: string
   name: string
@@ -31,6 +37,7 @@ interface Zone {
   regionId?: string | null
   activities?: { activityId: string }[]
   amenities?: { amenityId: string }[]
+  vertices?: Vertex[]
 }
 
 interface ZoneForm {
@@ -49,6 +56,7 @@ interface ZoneForm {
   regionId: string
   activityIds: string[]
   amenityIds: string[]
+  vertices: { lambertX: string; lambertY: string }[]
 }
 
 const statuses = [
@@ -83,7 +91,9 @@ export default function ZonesAdmin() {
     regionId: '',
     activityIds: [],
     amenityIds: [],
+    vertices: [],
   })
+  const [images, setImages] = useState<{ file: File; url: string }[]>([])
 
   useEffect(() => {
     if (session && session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') {
@@ -142,6 +152,52 @@ export default function ZonesAdmin() {
     }))
   }
 
+  const addVertex = () => {
+    setForm((f) => ({
+      ...f,
+      vertices: [...f.vertices, { lambertX: '', lambertY: '' }],
+    }))
+  }
+
+  const updateVertex = (
+    index: number,
+    field: 'lambertX' | 'lambertY',
+    value: string
+  ) => {
+    setForm((f) => {
+      const verts = [...f.vertices]
+      verts[index] = { ...verts[index], [field]: value }
+      return { ...f, vertices: verts }
+    })
+  }
+
+  const removeVertex = (index: number) => {
+    setForm((f) => {
+      const verts = [...f.vertices]
+      verts.splice(index, 1)
+      return { ...f, vertices: verts }
+    })
+  }
+
+  const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
+    const files = Array.from(e.target.files).map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }))
+    setImages((imgs) => [...imgs, ...files])
+    e.target.value = ''
+  }
+
+  const removeImage = (idx: number) => {
+    setImages((imgs) => {
+      const copy = [...imgs]
+      URL.revokeObjectURL(copy[idx].url)
+      copy.splice(idx, 1)
+      return copy
+    })
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     const body = {
@@ -159,6 +215,11 @@ export default function ZonesAdmin() {
       regionId: form.regionId || undefined,
       activityIds: form.activityIds,
       amenityIds: form.amenityIds,
+      vertices: form.vertices.map((v, i) => ({
+        seq: i,
+        lambertX: v.lambertX ? parseFloat(v.lambertX) : 0,
+        lambertY: v.lambertY ? parseFloat(v.lambertY) : 0,
+      })),
     }
     if (form.id) {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/zones/${form.id}`, {
@@ -189,7 +250,9 @@ export default function ZonesAdmin() {
       regionId: '',
       activityIds: [],
       amenityIds: [],
+      vertices: [],
     })
+    setImages([])
     load()
   }
 
@@ -210,7 +273,12 @@ export default function ZonesAdmin() {
       regionId: z.regionId || '',
       activityIds: z.activities ? z.activities.map(a => a.activityId) : [],
       amenityIds: z.amenities ? z.amenities.map(a => a.amenityId) : [],
+      vertices: z.vertices ? z.vertices.sort((a,b)=>a.seq-b.seq).map(v => ({
+        lambertX: v.lambertX.toString(),
+        lambertY: v.lambertY.toString(),
+      })) : [],
     })
+    setImages([])
   }
 
   async function del(id: string) {
@@ -284,6 +352,29 @@ export default function ZonesAdmin() {
               </div>
             </div>
             <div>
+              <Label>Coordonnées Lambert (polygone)</Label>
+              {form.vertices.map((v, idx) => (
+                <div key={idx} className="grid grid-cols-2 gap-2 items-center mb-2">
+                  <Input
+                    placeholder="X"
+                    value={v.lambertX}
+                    onChange={(e) => updateVertex(idx, 'lambertX', e.target.value)}
+                  />
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Y"
+                      value={v.lambertY}
+                      onChange={(e) => updateVertex(idx, 'lambertY', e.target.value)}
+                    />
+                    <Button type="button" size="sm" variant="destructive" onClick={() => removeVertex(idx)}>
+                      ×
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              <Button type="button" size="sm" onClick={addVertex}>Ajouter un point</Button>
+            </div>
+            <div>
               <Label htmlFor="status">Statut</Label>
               <Select value={form.status} onValueChange={handleStatus}>
                 <SelectTrigger>
@@ -349,6 +440,24 @@ export default function ZonesAdmin() {
                     />
                     <span>{a.name}</span>
                   </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label>Photos</Label>
+              <Input type="file" multiple onChange={handleFiles} />
+              <div className="flex flex-wrap gap-2 mt-2">
+                {images.map((img, idx) => (
+                  <div key={idx} className="relative">
+                    <img src={img.url} className="w-24 h-24 object-cover rounded" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(idx)}
+                      className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center"
+                    >
+                      ×
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>

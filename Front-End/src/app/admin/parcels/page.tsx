@@ -15,6 +15,12 @@ import {
   SelectItem,
 } from '@/components/ui/select'
 
+interface Vertex {
+  seq: number
+  lambertX: number
+  lambertY: number
+}
+
 interface Parcel {
   id: string
   reference: string
@@ -26,6 +32,7 @@ interface Parcel {
   lambertX?: number | null
   lambertY?: number | null
   zoneId: string
+  vertices?: Vertex[]
 }
 
 interface ParcelForm {
@@ -39,6 +46,7 @@ interface ParcelForm {
   lambertX: string
   lambertY: string
   zoneId: string
+  vertices: { lambertX: string; lambertY: string }[]
 }
 
 const statuses = ['AVAILABLE', 'RESERVED', 'OCCUPIED', 'SHOWROOM']
@@ -58,8 +66,10 @@ export default function ParcelsAdmin() {
     longitude: '',
     lambertX: '',
     lambertY: '',
-    zoneId: ''
+    zoneId: '',
+    vertices: [],
   })
+  const [images, setImages] = useState<{ file: File; url: string }[]>([])
 
   useEffect(() => { if (session && session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') router.push('/auth/login') }, [session])
 
@@ -86,6 +96,52 @@ export default function ParcelsAdmin() {
     setForm({ ...form, zoneId: value })
   }
 
+  const addVertex = () => {
+    setForm((f) => ({
+      ...f,
+      vertices: [...f.vertices, { lambertX: '', lambertY: '' }],
+    }))
+  }
+
+  const updateVertex = (
+    index: number,
+    field: 'lambertX' | 'lambertY',
+    value: string
+  ) => {
+    setForm((f) => {
+      const verts = [...f.vertices]
+      verts[index] = { ...verts[index], [field]: value }
+      return { ...f, vertices: verts }
+    })
+  }
+
+  const removeVertex = (index: number) => {
+    setForm((f) => {
+      const verts = [...f.vertices]
+      verts.splice(index, 1)
+      return { ...f, vertices: verts }
+    })
+  }
+
+  const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
+    const files = Array.from(e.target.files).map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }))
+    setImages((imgs) => [...imgs, ...files])
+    e.target.value = ''
+  }
+
+  const removeImage = (idx: number) => {
+    setImages((imgs) => {
+      const copy = [...imgs]
+      URL.revokeObjectURL(copy[idx].url)
+      copy.splice(idx, 1)
+      return copy
+    })
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     const body = {
@@ -98,6 +154,11 @@ export default function ParcelsAdmin() {
       lambertX: form.lambertX ? parseFloat(form.lambertX) : undefined,
       lambertY: form.lambertY ? parseFloat(form.lambertY) : undefined,
       zoneId: form.zoneId,
+      vertices: form.vertices.map((v, i) => ({
+        seq: i,
+        lambertX: v.lambertX ? parseFloat(v.lambertX) : 0,
+        lambertY: v.lambertY ? parseFloat(v.lambertY) : 0,
+      })),
     }
 
     if (form.id) {
@@ -125,7 +186,9 @@ export default function ParcelsAdmin() {
       lambertX: '',
       lambertY: '',
       zoneId: '',
+      vertices: [],
     })
+    setImages([])
     load()
   }
 
@@ -141,7 +204,12 @@ export default function ParcelsAdmin() {
       lambertX: it.lambertX?.toString() ?? '',
       lambertY: it.lambertY?.toString() ?? '',
       zoneId: it.zoneId,
+      vertices: it.vertices ? it.vertices.sort((a,b)=>a.seq-b.seq).map(v=>({
+        lambertX: v.lambertX.toString(),
+        lambertY: v.lambertY.toString(),
+      })) : [],
     })
+    setImages([])
   }
   async function del(id: string) {
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/parcels/${id}`, { method: 'DELETE' })
@@ -204,6 +272,29 @@ export default function ParcelsAdmin() {
               </div>
             </div>
             <div>
+              <Label>Coordonnées Lambert (polygone)</Label>
+              {form.vertices.map((v, idx) => (
+                <div key={idx} className="grid grid-cols-2 gap-2 items-center mb-2">
+                  <Input
+                    placeholder="X"
+                    value={v.lambertX}
+                    onChange={(e) => updateVertex(idx, 'lambertX', e.target.value)}
+                  />
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Y"
+                      value={v.lambertY}
+                      onChange={(e) => updateVertex(idx, 'lambertY', e.target.value)}
+                    />
+                    <Button type="button" size="sm" variant="destructive" onClick={() => removeVertex(idx)}>
+                      ×
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              <Button type="button" size="sm" onClick={addVertex}>Ajouter un point</Button>
+            </div>
+            <div>
               <Label htmlFor="zoneId">Zone</Label>
               <Select value={form.zoneId} onValueChange={handleZone}>
                 <SelectTrigger>
@@ -228,6 +319,24 @@ export default function ParcelsAdmin() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label>Photos</Label>
+              <Input type="file" multiple onChange={handleFiles} />
+              <div className="flex flex-wrap gap-2 mt-2">
+                {images.map((img, idx) => (
+                  <div key={idx} className="relative">
+                    <img src={img.url} className="w-24 h-24 object-cover rounded" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(idx)}
+                      className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
             <Button type="submit">{form.id ? 'Mettre à jour' : 'Créer'}</Button>
           </form>
