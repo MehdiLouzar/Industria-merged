@@ -6,18 +6,32 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { getBaseUrl } from '@/lib/utils'
 
-type GeoFeature = {
+type ZoneFeature = {
   geometry: { type: string; coordinates: [number, number] }
-  properties: Record<string, unknown>
+  properties: {
+    id: string
+    name: string
+    status: string
+    availableParcels: number
+    activityIcons: string[]
+  }
+}
+
+type ParcelFeature = {
+  geometry: { type: string; coordinates: [number, number] }
+  properties: { id: string; reference: string }
 }
 
 export default function MapView() {
-  const [zones, setZones] = useState<GeoFeature[]>([])
-  const [parcels, setParcels] = useState<GeoFeature[]>([])
+  const [zones, setZones] = useState<ZoneFeature[]>([])
+  const [parcels, setParcels] = useState<ParcelFeature[]>([])
 
   useEffect(() => {
     const base = getBaseUrl()
-    fetch(`${base}/api/map/zones`).then(r => r.json()).then(d => setZones(d.features)).catch(console.error)
+    fetch(`${base}/api/map/zones`)
+      .then(r => r.json())
+      .then(d => setZones(d.features))
+      .catch(console.error)
     fetch(`${base}/api/map/parcels`).then(r => r.json()).then(d => setParcels(d.features)).catch(console.error)
   }, [])
 
@@ -29,12 +43,28 @@ export default function MapView() {
         id="mapbox/streets-v11"
       />
       {zones.map(z => (
-        <Marker key={z.properties.id} position={[z.geometry.coordinates[1], z.geometry.coordinates[0]]}>
+        <Marker
+          key={z.properties.id}
+          position={[z.geometry.coordinates[1], z.geometry.coordinates[0]]}
+        >
           <Popup>
-            <div className="space-y-1">
-              <strong>{z.properties.name}</strong>
+            <div className="space-y-1 text-sm">
+              <strong className="block mb-1">{z.properties.name}</strong>
               <div>Statut: {z.properties.status}</div>
-              <Link href={`/zones/${z.properties.id}`} className="text-blue-600 underline">Voir la zone</Link>
+              <div>Parcelles disponibles: {z.properties.availableParcels}</div>
+              {z.properties.activityIcons.length > 0 && (
+                <div className="flex gap-1 text-lg">
+                  {z.properties.activityIcons.map((ic, i) => (
+                    <span key={i}>{ic}</span>
+                  ))}
+                </div>
+              )}
+              <Link
+                href={`/zones/${z.properties.id}`}
+                className="text-blue-600 underline block mt-1"
+              >
+                Voir la zone
+              </Link>
             </div>
           </Popup>
         </Marker>

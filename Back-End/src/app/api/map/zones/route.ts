@@ -9,6 +9,8 @@ export async function GET() {
       latitude: true,
       longitude: true,
       status: true,
+      parcels: { select: { status: true } },
+      activities: { select: { activity: { select: { icon: true } } } },
     },
   });
 
@@ -17,7 +19,13 @@ export async function GET() {
     .map(z => ({
       type: "Feature",
       geometry: { type: "Point", coordinates: [z.longitude, z.latitude] },
-      properties: { id: z.id, name: z.name, status: z.status }
+      properties: {
+        id: z.id,
+        name: z.name,
+        status: z.status,
+        availableParcels: z.parcels.filter(p => p.status === 'AVAILABLE').length,
+        activityIcons: z.activities.map(a => a.activity.icon).filter(Boolean),
+      }
     }));
 
   return applyCors(Response.json({ type: "FeatureCollection", features }));
