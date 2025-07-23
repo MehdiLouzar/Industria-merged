@@ -1,3 +1,4 @@
+import { applyCors, corsOptions } from "@/lib/cors";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 
@@ -18,10 +19,10 @@ export async function GET(
   });
 
   if (!zone) {
-    return new Response("Not Found", { status: 404 });
+    return applyCors(new Response("Not Found", { status: 404 }));
   }
 
-  return Response.json(zone);
+  return applyCors(Response.json(zone));
 }
 
 export async function PUT(
@@ -75,9 +76,9 @@ export async function PUT(
       },
     });
 
-    return Response.json(zone);
+    return applyCors(Response.json(zone));
   } catch (error) {
-    return new Response('Invalid data', { status: 400 });
+    return applyCors(new Response('Invalid data', { status: 400 }));
   }
 }
 
@@ -87,8 +88,12 @@ export async function DELETE(
 ) {
   try {
     await prisma.zone.delete({ where: { id: params.id } });
-    return new Response(null, { status: 204 });
+    return applyCors(new Response(null, { status: 204 }));
   } catch (error) {
-    return new Response('Not Found', { status: 404 });
+    return applyCors(new Response('Not Found', { status: 404 }));
   }
+}
+
+export function OPTIONS() {
+  return corsOptions();
 }

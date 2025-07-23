@@ -1,8 +1,9 @@
+import { applyCors, corsOptions } from "@/lib/cors";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   const items = await prisma.parcel.findMany({ include: { vertices: true } });
-  return Response.json(items);
+  return applyCors(Response.json(items));
 }
 
 export async function POST(req: Request) {
@@ -18,8 +19,12 @@ export async function POST(req: Request) {
       },
       include: { vertices: true },
     });
-    return Response.json(item, { status: 201 });
+    return applyCors(Response.json(item, { status: 201 }));
   } catch {
-    return new Response('Invalid data', { status: 400 });
+    return applyCors(new Response('Invalid data', { status: 400 }));
   }
+}
+
+export function OPTIONS() {
+  return corsOptions();
 }

@@ -1,3 +1,4 @@
+import { applyCors, corsOptions } from "@/lib/cors";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 
@@ -12,7 +13,7 @@ export async function GET() {
       vertices: true,
     },
   });
-  return Response.json(zones);
+  return applyCors(Response.json(zones));
 }
 
 export async function POST(req: Request) {
@@ -61,8 +62,12 @@ export async function POST(req: Request) {
       },
     });
 
-    return Response.json(full, { status: 201 });
+    return applyCors(Response.json(full, { status: 201 }));
   } catch (error) {
-    return new Response('Invalid data', { status: 400 });
+    return applyCors(new Response('Invalid data', { status: 400 }));
   }
+}
+
+export function OPTIONS() {
+  return corsOptions();
 }

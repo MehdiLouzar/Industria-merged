@@ -16,8 +16,9 @@ The server listens on port 3001 by default and connects to PostgreSQL using `DAT
 
 ### CORS
 
-API routes include a middleware that sets permissive CORS headers. Requests from the
-frontend running on `localhost:3000` therefore succeed without additional configuration.
+Every API handler adds permissive CORS headers using a small helper. Requests from
+the frontend running on `localhost:3000` therefore succeed without additional
+configuration.
 
 ## Populate the database with initDB.sql
 

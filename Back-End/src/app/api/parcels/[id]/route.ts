@@ -1,3 +1,4 @@
+import { applyCors, corsOptions } from "@/lib/cors";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
@@ -5,8 +6,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     where: { id: params.id },
     include: { vertices: true },
   });
-  if (!item) return new Response('Not Found', { status: 404 });
-  return Response.json(item);
+  if (!item) return applyCors(new Response('Not Found', { status: 404 }));
+  return applyCors(Response.json(item));
 }
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
@@ -24,17 +25,21 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       where: { id: params.id },
       include: { vertices: true },
     });
-    return Response.json(item);
+    return applyCors(Response.json(item));
   } catch {
-    return new Response('Invalid data', { status: 400 });
+    return applyCors(new Response('Invalid data', { status: 400 }));
   }
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
     await prisma.parcel.delete({ where: { id: params.id } });
-    return new Response(null, { status: 204 });
+    return applyCors(new Response(null, { status: 204 }));
   } catch {
-    return new Response('Not Found', { status: 404 });
+    return applyCors(new Response('Not Found', { status: 404 }));
   }
+}
+
+export function OPTIONS() {
+  return corsOptions();
 }
