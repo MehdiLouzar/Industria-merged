@@ -24,15 +24,17 @@ export async function GET() {
     })
   ]);
 
-  return applyCors(Response.json({
-    totalUsers,
-    totalZones,
-    totalParcels,
-    totalAppointments,
-    pendingAppointments,
-    availableParcels,
-    recentActivities
-  });
+  return applyCors(
+    Response.json({
+      totalUsers,
+      totalZones,
+      totalParcels,
+      totalAppointments,
+      pendingAppointments,
+      availableParcels,
+      recentActivities
+    })
+  );
 }
 
 export function OPTIONS() {
