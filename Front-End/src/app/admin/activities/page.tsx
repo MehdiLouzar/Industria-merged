@@ -8,13 +8,23 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-interface Activity { id: string; name: string }
+interface Activity {
+  id: string
+  name: string
+  description?: string
+  icon?: string
+}
 
 export default function ActivitiesAdmin() {
   const { data: session } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<Activity[]>([])
-  const [form, setForm] = useState<Activity>({ id: '', name: '' })
+  const [form, setForm] = useState<Activity>({
+    id: '',
+    name: '',
+    description: '',
+    icon: '',
+  })
 
   useEffect(() => { if (session && session.user.role !== 'ADMIN') router.push('/auth/login') }, [session])
 
@@ -30,20 +40,36 @@ export default function ActivitiesAdmin() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
+    const body = {
+      name: form.name,
+      description: form.description || undefined,
+      icon: form.icon || undefined,
+    }
     if (form.id) {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/activities/${form.id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: form.name })
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       })
     } else {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/activities`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: form.name })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       })
     }
-    setForm({ id: '', name: '' })
+    setForm({ id: '', name: '', description: '', icon: '' })
     load()
   }
 
-  function edit(it: Activity) { setForm(it) }
+  function edit(it: Activity) {
+    setForm({
+      id: it.id,
+      name: it.name,
+      description: it.description ?? '',
+      icon: it.icon ?? '',
+    })
+  }
   async function del(id: string) {
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/activities/${id}`, { method: 'DELETE' })
     load()
@@ -73,6 +99,14 @@ export default function ActivitiesAdmin() {
             <div>
               <Label htmlFor="name">Nom</Label>
               <Input id="name" name="name" value={form.name} onChange={handleChange} required />
+            </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Input id="description" name="description" value={form.description} onChange={handleChange} />
+            </div>
+            <div>
+              <Label htmlFor="icon">Icône</Label>
+              <Input id="icon" name="icon" value={form.icon} onChange={handleChange} />
             </div>
             <Button type="submit">{form.id ? 'Mettre à jour' : 'Créer'}</Button>
           </form>

@@ -20,6 +20,9 @@ interface User {
   email: string
   name: string
   role: string
+  company?: string
+  phone?: string
+  isActive?: boolean
 }
 
 const roles = ['ADMIN', 'MANAGER', 'USER']
@@ -28,7 +31,16 @@ export default function UsersAdmin() {
   const { data: session } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<User[]>([])
-  const [form, setForm] = useState<User & { password?: string }>({ id: '', email: '', name: '', role: 'USER', password: '' })
+  const [form, setForm] = useState<User & { password?: string }>({
+    id: '',
+    email: '',
+    name: '',
+    role: 'USER',
+    company: '',
+    phone: '',
+    isActive: true,
+    password: '',
+  })
 
   useEffect(() => { if (session && session.user.role !== 'ADMIN') router.push('/auth/login') }, [session])
 
@@ -48,7 +60,15 @@ export default function UsersAdmin() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
-    const body = { email: form.email, name: form.name, role: form.role, password: form.password }
+    const body = {
+      email: form.email,
+      name: form.name,
+      role: form.role,
+      company: form.company || undefined,
+      phone: form.phone || undefined,
+      isActive: form.isActive,
+      password: form.password,
+    }
     if (form.id) {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${form.id}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
@@ -58,11 +78,31 @@ export default function UsersAdmin() {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
       })
     }
-    setForm({ id: '', email: '', name: '', role: 'USER', password: '' })
+    setForm({
+      id: '',
+      email: '',
+      name: '',
+      role: 'USER',
+      company: '',
+      phone: '',
+      isActive: true,
+      password: '',
+    })
     load()
   }
 
-  function edit(it: User) { setForm({ ...it, password: '' }) }
+  function edit(it: User) {
+    setForm({
+      id: it.id,
+      email: it.email,
+      name: it.name,
+      role: it.role,
+      company: it.company ?? '',
+      phone: it.phone ?? '',
+      isActive: it.isActive ?? true,
+      password: '',
+    })
+  }
   async function del(id: string) {
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${id}`, { method: 'DELETE' })
     load()
@@ -98,6 +138,14 @@ export default function UsersAdmin() {
               <Input id="name" name="name" value={form.name} onChange={handleChange} />
             </div>
             <div>
+              <Label htmlFor="company">Société</Label>
+              <Input id="company" name="company" value={form.company} onChange={handleChange} />
+            </div>
+            <div>
+              <Label htmlFor="phone">Téléphone</Label>
+              <Input id="phone" name="phone" value={form.phone} onChange={handleChange} />
+            </div>
+            <div>
               <Label htmlFor="role">Rôle</Label>
               <Select value={form.role} onValueChange={handleRole}>
                 <SelectTrigger>
@@ -109,6 +157,10 @@ export default function UsersAdmin() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input id="isActive" name="isActive" type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
+              <Label htmlFor="isActive">Actif</Label>
             </div>
             <div>
               <Label htmlFor="password">Mot de passe</Label>

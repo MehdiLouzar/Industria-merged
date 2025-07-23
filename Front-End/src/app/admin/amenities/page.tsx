@@ -8,13 +8,25 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-interface Amenity { id: string; name: string }
+interface Amenity {
+  id: string
+  name: string
+  description?: string
+  icon?: string
+  category?: string
+}
 
 export default function AmenitiesAdmin() {
   const { data: session } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<Amenity[]>([])
-  const [form, setForm] = useState<Amenity>({ id: '', name: '' })
+  const [form, setForm] = useState<Amenity>({
+    id: '',
+    name: '',
+    description: '',
+    icon: '',
+    category: '',
+  })
 
   useEffect(() => { if (session && session.user.role !== 'ADMIN') router.push('/auth/login') }, [session])
 
@@ -30,20 +42,38 @@ export default function AmenitiesAdmin() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
+    const body = {
+      name: form.name,
+      description: form.description || undefined,
+      icon: form.icon || undefined,
+      category: form.category || undefined,
+    }
     if (form.id) {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/amenities/${form.id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: form.name })
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       })
     } else {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/amenities`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: form.name })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       })
     }
-    setForm({ id: '', name: '' })
+    setForm({ id: '', name: '', description: '', icon: '', category: '' })
     load()
   }
 
-  function edit(it: Amenity) { setForm(it) }
+  function edit(it: Amenity) {
+    setForm({
+      id: it.id,
+      name: it.name,
+      description: it.description ?? '',
+      icon: it.icon ?? '',
+      category: it.category ?? '',
+    })
+  }
   async function del(id: string) {
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/amenities/${id}`, { method: 'DELETE' })
     load()
@@ -73,6 +103,18 @@ export default function AmenitiesAdmin() {
             <div>
               <Label htmlFor="name">Nom</Label>
               <Input id="name" name="name" value={form.name} onChange={handleChange} required />
+            </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Input id="description" name="description" value={form.description} onChange={handleChange} />
+            </div>
+            <div>
+              <Label htmlFor="icon">Icône</Label>
+              <Input id="icon" name="icon" value={form.icon} onChange={handleChange} />
+            </div>
+            <div>
+              <Label htmlFor="category">Catégorie</Label>
+              <Input id="category" name="category" value={form.category} onChange={handleChange} />
             </div>
             <Button type="submit">{form.id ? 'Mettre à jour' : 'Créer'}</Button>
           </form>
