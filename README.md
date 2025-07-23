@@ -43,10 +43,20 @@ This starts PostgreSQL, the API backend on port 3001 and the front-end on port 3
 
 ### Manual database initialisation
 
-To execute the SQL script directly, run the helper inside `Back-End/scripts`:
+To execute the SQL script directly, run the helper inside `Back-End/scripts`.
+It automatically falls back to Docker if the `psql` command is not available:
 
 ```bash
 cd Back-End
 export PGPASSWORD=postgres
 ./scripts/run_initdb.sh
+```
+
+When using `docker compose`, the script will execute `psql` inside the `db` service.
+You can also run the command manually:
+
+```bash
+PGPASSWORD=postgres docker compose exec db \
+  psql -U postgres -d industria \
+  -f /docker-entrypoint-initdb.d/initDB.sql
 ```
