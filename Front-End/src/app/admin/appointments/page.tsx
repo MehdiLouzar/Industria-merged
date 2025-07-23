@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { getBaseUrl, fetchApi } from '@/lib/utils'
+import Pagination from '@/components/Pagination'
 import {
   Select,
   SelectTrigger,
@@ -35,6 +36,8 @@ export default function AppointmentsAdmin() {
   const { data: session } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<Appointment[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
   const [open, setOpen] = useState(false)
   const [parcels, setParcels] = useState<{ id: string; reference: string }[]>([])
   const [form, setForm] = useState<Appointment>({
@@ -56,7 +59,10 @@ export default function AppointmentsAdmin() {
       fetchApi<Appointment[]>('/api/appointments'),
       fetchApi<{ id: string; reference: string }[]>('/api/parcels'),
     ])
-    if (a) setItems(a)
+    if (a) {
+      setItems(a)
+      setCurrentPage(1)
+    }
     if (p) setParcels(p)
   }
   useEffect(() => { load() }, [])
@@ -110,6 +116,7 @@ export default function AppointmentsAdmin() {
       parcelId: '',
       status: 'PENDING',
     })
+    setOpen(false)
     load()
   }
 
@@ -165,7 +172,9 @@ export default function AppointmentsAdmin() {
               </tr>
             </thead>
             <tbody>
-              {items.map((a) => (
+              {items
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((a) => (
                 <tr key={a.id} className="border-b last:border-0">
                   <td className="p-2 align-top">{a.contactName}</td>
                   <td className="p-2 align-top">{a.status}</td>
@@ -182,6 +191,13 @@ export default function AppointmentsAdmin() {
           </table>
         </CardContent>
       </Card>
+
+      <Pagination
+        totalItems={items.length}
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { getBaseUrl, fetchApi } from '@/lib/utils'
+import Pagination from '@/components/Pagination'
 
 interface Country {
   id: string
@@ -20,6 +21,8 @@ export default function CountriesAdmin() {
   const { data: session } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<Country[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState<Country>({ id: '', name: '', code: '' })
 
@@ -31,7 +34,10 @@ export default function CountriesAdmin() {
 
   async function load() {
     const items = await fetchApi<Country[]>('/api/countries')
-    if (items) setItems(items)
+    if (items) {
+      setItems(items)
+      setCurrentPage(1)
+    }
   }
   useEffect(() => { load() }, [])
 
@@ -55,6 +61,7 @@ export default function CountriesAdmin() {
       })
     }
     setForm({ id: '', name: '', code: '' })
+    setOpen(false)
     load()
   }
 
@@ -90,7 +97,9 @@ export default function CountriesAdmin() {
               </tr>
             </thead>
             <tbody>
-              {items.map((c) => (
+              {items
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((c) => (
                 <tr key={c.id} className="border-b last:border-0">
                   <td className="p-2 align-top">{c.name}</td>
                   <td className="p-2 align-top">{c.code}</td>
@@ -106,6 +115,13 @@ export default function CountriesAdmin() {
           </table>
         </CardContent>
       </Card>
+
+      <Pagination
+        totalItems={items.length}
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { getBaseUrl, fetchApi } from '@/lib/utils'
+import Pagination from '@/components/Pagination'
 import {
   Select,
   SelectTrigger,
@@ -33,6 +34,8 @@ export default function UsersAdmin() {
   const { data: session } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<User[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState<User & { password?: string }>({
     id: '',
@@ -49,7 +52,10 @@ export default function UsersAdmin() {
 
   async function load() {
     const users = await fetchApi<User[]>('/api/users')
-    if (users) setItems(users)
+    if (users) {
+      setItems(users)
+      setCurrentPage(1)
+    }
   }
   useEffect(() => { load() }, [])
 
@@ -91,6 +97,7 @@ export default function UsersAdmin() {
       isActive: true,
       password: '',
     })
+    setOpen(false)
     load()
   }
 
@@ -144,7 +151,9 @@ export default function UsersAdmin() {
               </tr>
             </thead>
             <tbody>
-              {items.map((u) => (
+              {items
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((u) => (
                 <tr key={u.id} className="border-b last:border-0">
                   <td className="p-2 align-top">{u.email}</td>
                   <td className="p-2 align-top">{u.role}</td>
@@ -161,6 +170,13 @@ export default function UsersAdmin() {
           </table>
         </CardContent>
       </Card>
+
+      <Pagination
+        totalItems={items.length}
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { getBaseUrl, fetchApi } from '@/lib/utils'
+import Pagination from '@/components/Pagination'
 import {
   Select,
   SelectTrigger,
@@ -73,6 +74,8 @@ export default function ZonesAdmin() {
   const { data: session } = useSession()
   const router = useRouter()
   const [zones, setZones] = useState<Zone[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
   const [open, setOpen] = useState(false)
   const [zoneTypes, setZoneTypes] = useState<{ id: string; name: string }[]>([])
   const [regions, setRegions] = useState<{ id: string; name: string }[]>([])
@@ -112,7 +115,10 @@ export default function ZonesAdmin() {
       fetchApi<{ id: string; name: string }[]>('/api/activities'),
       fetchApi<{ id: string; name: string }[]>('/api/amenities'),
     ])
-    if (z) setZones(z)
+    if (z) {
+      setZones(z)
+      setCurrentPage(1)
+    }
     if (t) setZoneTypes(t)
     if (r) setRegions(r)
     if (a) setActivities(a)
@@ -255,6 +261,7 @@ export default function ZonesAdmin() {
       vertices: [],
     })
     setImages([])
+    setOpen(false)
     load()
   }
 
@@ -330,7 +337,9 @@ export default function ZonesAdmin() {
               </tr>
             </thead>
             <tbody>
-              {zones.map((zone) => (
+              {zones
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((zone) => (
                 <tr key={zone.id} className="border-b last:border-0">
                   <td className="p-2 align-top">{zone.name}</td>
                   <td className="p-2 align-top">{zone.status}</td>
@@ -347,6 +356,13 @@ export default function ZonesAdmin() {
           </table>
         </CardContent>
       </Card>
+
+      <Pagination
+        totalItems={zones.length}
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>

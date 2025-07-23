@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { getBaseUrl, fetchApi } from '@/lib/utils'
+import Pagination from '@/components/Pagination'
 
 interface ZoneType {
   id: string
@@ -19,6 +20,8 @@ export default function ZoneTypesAdmin() {
   const { data: session } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<ZoneType[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState<ZoneType>({ id: '', name: '' })
 
@@ -28,7 +31,10 @@ export default function ZoneTypesAdmin() {
 
   async function load() {
     const items = await fetchApi<ZoneType[]>('/api/zone-types')
-    if (items) setItems(items)
+    if (items) {
+      setItems(items)
+      setCurrentPage(1)
+    }
   }
   useEffect(() => { load() }, [])
 
@@ -52,6 +58,7 @@ export default function ZoneTypesAdmin() {
       })
     }
     setForm({ id: '', name: '' })
+    setOpen(false)
     load()
   }
 
@@ -86,7 +93,9 @@ export default function ZoneTypesAdmin() {
               </tr>
             </thead>
             <tbody>
-              {items.map((t) => (
+              {items
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((t) => (
                 <tr key={t.id} className="border-b last:border-0">
                   <td className="p-2 align-top">{t.name}</td>
                   <td className="p-2 space-x-2 whitespace-nowrap">
@@ -101,6 +110,13 @@ export default function ZoneTypesAdmin() {
           </table>
         </CardContent>
       </Card>
+
+      <Pagination
+        totalItems={items.length}
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>

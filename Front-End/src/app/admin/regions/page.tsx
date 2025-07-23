@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { getBaseUrl, fetchApi } from '@/lib/utils'
+import Pagination from '@/components/Pagination'
 import {
   Select,
   SelectTrigger,
@@ -28,6 +29,8 @@ export default function RegionsAdmin() {
   const { data: session } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<Region[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
   const [open, setOpen] = useState(false)
   const [countries, setCountries] = useState<{ id: string; name: string }[]>([])
   const [form, setForm] = useState<Region>({ id: '', name: '', code: '', countryId: '' })
@@ -43,7 +46,10 @@ export default function RegionsAdmin() {
       fetchApi<Region[]>('/api/regions'),
       fetchApi<{ id: string; name: string }[]>('/api/countries'),
     ])
-    if (r) setItems(r)
+    if (r) {
+      setItems(r)
+      setCurrentPage(1)
+    }
     if (c) setCountries(c)
   }
   useEffect(() => { load() }, [])
@@ -72,6 +78,7 @@ export default function RegionsAdmin() {
       })
     }
     setForm({ id: '', name: '', code: '', countryId: '' })
+    setOpen(false)
     load()
   }
 
@@ -108,7 +115,9 @@ export default function RegionsAdmin() {
               </tr>
             </thead>
             <tbody>
-              {items.map((r) => (
+              {items
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((r) => (
                 <tr key={r.id} className="border-b last:border-0">
                   <td className="p-2 align-top">{r.name}</td>
                   <td className="p-2 align-top">{r.code}</td>
@@ -125,6 +134,13 @@ export default function RegionsAdmin() {
           </table>
         </CardContent>
       </Card>
+
+      <Pagination
+        totalItems={items.length}
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>

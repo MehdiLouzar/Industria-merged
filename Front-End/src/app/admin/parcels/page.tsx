@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { getBaseUrl, fetchApi } from '@/lib/utils'
+import Pagination from '@/components/Pagination'
 import {
   Select,
   SelectTrigger,
@@ -57,6 +58,8 @@ export default function ParcelsAdmin() {
   const { data: session } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<Parcel[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
   const [open, setOpen] = useState(false)
   const [zones, setZones] = useState<{ id: string; name: string }[]>([])
   const [form, setForm] = useState<ParcelForm>({
@@ -81,7 +84,10 @@ export default function ParcelsAdmin() {
       fetchApi<Parcel[]>('/api/parcels'),
       fetchApi<{ id: string; name: string }[]>('/api/zones'),
     ])
-    if (p) setItems(p)
+    if (p) {
+      setItems(p)
+      setCurrentPage(1)
+    }
     if (z) setZones(z)
   }
   useEffect(() => { load() }, [])
@@ -191,6 +197,7 @@ export default function ParcelsAdmin() {
       vertices: [],
     })
     setImages([])
+    setOpen(false)
     load()
   }
 
@@ -255,7 +262,9 @@ export default function ParcelsAdmin() {
               </tr>
             </thead>
             <tbody>
-              {items.map((p) => (
+              {items
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((p) => (
                 <tr key={p.id} className="border-b last:border-0">
                   <td className="p-2 align-top">{p.reference}</td>
                   <td className="p-2 align-top">{p.zoneId}</td>
@@ -272,6 +281,13 @@ export default function ParcelsAdmin() {
           </table>
         </CardContent>
       </Card>
+
+      <Pagination
+        totalItems={items.length}
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
