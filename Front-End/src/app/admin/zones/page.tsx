@@ -21,6 +21,8 @@ interface Zone {
   status: string
   zoneTypeId?: string
   regionId?: string
+  activityIds: string[]
+  amenityIds: string[]
 }
 
 const statuses = [
@@ -37,12 +39,16 @@ export default function ZonesAdmin() {
   const [zones, setZones] = useState<Zone[]>([])
   const [zoneTypes, setZoneTypes] = useState<{ id: string; name: string }[]>([])
   const [regions, setRegions] = useState<{ id: string; name: string }[]>([])
+  const [activities, setActivities] = useState<{ id: string; name: string }[]>([])
+  const [amenities, setAmenities] = useState<{ id: string; name: string }[]>([])
   const [form, setForm] = useState<Zone>({
     id: '',
     name: '',
     status: 'AVAILABLE',
     zoneTypeId: '',
     regionId: '',
+    activityIds: [],
+    amenityIds: [],
   })
 
   useEffect(() => {
@@ -53,14 +59,18 @@ export default function ZonesAdmin() {
 
   async function load() {
     const base = process.env.NEXT_PUBLIC_API_URL
-    const [r1, r2, r3] = await Promise.all([
+    const [r1, r2, r3, r4, r5] = await Promise.all([
       fetch(`${base}/api/zones`),
       fetch(`${base}/api/zone-types`),
       fetch(`${base}/api/regions`),
+      fetch(`${base}/api/activities`),
+      fetch(`${base}/api/amenities`),
     ])
     if (r1.ok) setZones(await r1.json())
     if (r2.ok) setZoneTypes(await r2.json())
     if (r3.ok) setRegions(await r3.json())
+    if (r4.ok) setActivities(await r4.json())
+    if (r5.ok) setAmenities(await r5.json())
   }
   useEffect(() => { load() }, [])
 
@@ -80,6 +90,24 @@ export default function ZonesAdmin() {
     setForm({ ...form, regionId: value })
   }
 
+  const toggleActivity = (id: string) => {
+    setForm((f) => ({
+      ...f,
+      activityIds: f.activityIds.includes(id)
+        ? f.activityIds.filter((a) => a !== id)
+        : [...f.activityIds, id],
+    }))
+  }
+
+  const toggleAmenity = (id: string) => {
+    setForm((f) => ({
+      ...f,
+      amenityIds: f.amenityIds.includes(id)
+        ? f.amenityIds.filter((a) => a !== id)
+        : [...f.amenityIds, id],
+    }))
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     const body = {
@@ -87,6 +115,8 @@ export default function ZonesAdmin() {
       status: form.status,
       zoneTypeId: form.zoneTypeId || undefined,
       regionId: form.regionId || undefined,
+      activityIds: form.activityIds,
+      amenityIds: form.amenityIds,
     }
     if (form.id) {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/zones/${form.id}`, {
@@ -101,7 +131,15 @@ export default function ZonesAdmin() {
         body: JSON.stringify(body),
       })
     }
-    setForm({ id: '', name: '', status: 'AVAILABLE', zoneTypeId: '', regionId: '' })
+    setForm({
+      id: '',
+      name: '',
+      status: 'AVAILABLE',
+      zoneTypeId: '',
+      regionId: '',
+      activityIds: [],
+      amenityIds: [],
+    })
     load()
   }
 
@@ -112,6 +150,8 @@ export default function ZonesAdmin() {
       status: z.status,
       zoneTypeId: z.zoneTypeId || '',
       regionId: z.regionId || '',
+      activityIds: z.activities ? z.activities.map(a => a.activityId) : [],
+      amenityIds: z.amenities ? z.amenities.map(a => a.amenityId) : [],
     })
   }
 
@@ -185,6 +225,36 @@ export default function ZonesAdmin() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label>Activités</Label>
+              <div className="flex flex-wrap gap-2">
+                {activities.map((a) => (
+                  <label key={a.id} className="flex items-center space-x-1">
+                    <input
+                      type="checkbox"
+                      checked={form.activityIds.includes(a.id)}
+                      onChange={() => toggleActivity(a.id)}
+                    />
+                    <span>{a.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label>Équipements</Label>
+              <div className="flex flex-wrap gap-2">
+                {amenities.map((a) => (
+                  <label key={a.id} className="flex items-center space-x-1">
+                    <input
+                      type="checkbox"
+                      checked={form.amenityIds.includes(a.id)}
+                      onChange={() => toggleAmenity(a.id)}
+                    />
+                    <span>{a.name}</span>
+                  </label>
+                ))}
+              </div>
             </div>
             <Button type="submit">{form.id ? 'Mettre à jour' : 'Créer'}</Button>
           </form>
