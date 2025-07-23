@@ -63,16 +63,28 @@ export default function ZoneTypesAdmin() {
     <div className="p-4 space-y-6">
       <h1 className="text-xl font-bold">Types de zone</h1>
       <Card>
-        <CardContent className="divide-y">
-          {items.map(t => (
-            <div key={t.id} className="flex justify-between items-center py-2">
-              <span>{t.name}</span>
-              <div className="space-x-2">
-                <Button size="sm" onClick={() => edit(t)}>Éditer</Button>
-                <Button size="sm" variant="destructive" onClick={() => del(t.id)}>Supprimer</Button>
-              </div>
-            </div>
-          ))}
+        <CardContent className="overflow-x-auto p-0">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-left">
+                <th className="p-2">Nom</th>
+                <th className="p-2 w-32"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((t) => (
+                <tr key={t.id} className="border-b last:border-0">
+                  <td className="p-2 align-top">{t.name}</td>
+                  <td className="p-2 space-x-2 whitespace-nowrap">
+                    <Button size="sm" onClick={() => edit(t)}>Éditer</Button>
+                    <Button size="sm" variant="destructive" onClick={() => del(t.id)}>
+                      Supprimer
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </CardContent>
       </Card>
 

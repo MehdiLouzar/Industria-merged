@@ -112,16 +112,32 @@ export default function UsersAdmin() {
     <div className="p-4 space-y-6">
       <h1 className="text-xl font-bold">Utilisateurs</h1>
       <Card>
-        <CardContent className="divide-y">
-          {items.map(u => (
-            <div key={u.id} className="flex justify-between items-center py-2">
-              <span>{u.email}</span>
-              <div className="space-x-2">
-                <Button size="sm" onClick={() => edit(u)}>Éditer</Button>
-                <Button size="sm" variant="destructive" onClick={() => del(u.id)}>Supprimer</Button>
-              </div>
-            </div>
-          ))}
+        <CardContent className="overflow-x-auto p-0">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-left">
+                <th className="p-2">Email</th>
+                <th className="p-2">Rôle</th>
+                <th className="p-2">Société</th>
+                <th className="p-2 w-32"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((u) => (
+                <tr key={u.id} className="border-b last:border-0">
+                  <td className="p-2 align-top">{u.email}</td>
+                  <td className="p-2 align-top">{u.role}</td>
+                  <td className="p-2 align-top">{u.company}</td>
+                  <td className="p-2 space-x-2 whitespace-nowrap">
+                    <Button size="sm" onClick={() => edit(u)}>Éditer</Button>
+                    <Button size="sm" variant="destructive" onClick={() => del(u.id)}>
+                      Supprimer
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </CardContent>
       </Card>
 

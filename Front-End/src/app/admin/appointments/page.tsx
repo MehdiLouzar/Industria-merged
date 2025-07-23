@@ -133,16 +133,32 @@ export default function AppointmentsAdmin() {
     <div className="p-4 space-y-6">
       <h1 className="text-xl font-bold">Rendez-vous</h1>
       <Card>
-        <CardContent className="divide-y">
-          {items.map(a => (
-            <div key={a.id} className="flex justify-between items-center py-2">
-              <span>{a.contactName} - {a.status}</span>
-              <div className="space-x-2">
-                <Button size="sm" onClick={() => edit(a)}>Éditer</Button>
-                <Button size="sm" variant="destructive" onClick={() => del(a.id)}>Supprimer</Button>
-              </div>
-            </div>
-          ))}
+        <CardContent className="overflow-x-auto p-0">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-left">
+                <th className="p-2">Contact</th>
+                <th className="p-2">Statut</th>
+                <th className="p-2">Parcelle</th>
+                <th className="p-2 w-32"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((a) => (
+                <tr key={a.id} className="border-b last:border-0">
+                  <td className="p-2 align-top">{a.contactName}</td>
+                  <td className="p-2 align-top">{a.status}</td>
+                  <td className="p-2 align-top">{a.parcelId}</td>
+                  <td className="p-2 space-x-2 whitespace-nowrap">
+                    <Button size="sm" onClick={() => edit(a)}>Éditer</Button>
+                    <Button size="sm" variant="destructive" onClick={() => del(a.id)}>
+                      Supprimer
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </CardContent>
       </Card>
 

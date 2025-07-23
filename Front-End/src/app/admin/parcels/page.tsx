@@ -220,16 +220,32 @@ export default function ParcelsAdmin() {
     <div className="p-4 space-y-6">
       <h1 className="text-xl font-bold">Parcelles</h1>
       <Card>
-        <CardContent className="divide-y">
-          {items.map(p => (
-            <div key={p.id} className="flex justify-between items-center py-2">
-              <span>{p.reference}</span>
-              <div className="space-x-2">
-                <Button size="sm" onClick={() => edit(p)}>Éditer</Button>
-                <Button size="sm" variant="destructive" onClick={() => del(p.id)}>Supprimer</Button>
-              </div>
-            </div>
-          ))}
+        <CardContent className="overflow-x-auto p-0">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-left">
+                <th className="p-2">Référence</th>
+                <th className="p-2">Zone</th>
+                <th className="p-2">Statut</th>
+                <th className="p-2 w-32"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((p) => (
+                <tr key={p.id} className="border-b last:border-0">
+                  <td className="p-2 align-top">{p.reference}</td>
+                  <td className="p-2 align-top">{p.zoneId}</td>
+                  <td className="p-2 align-top">{p.status}</td>
+                  <td className="p-2 space-x-2 whitespace-nowrap">
+                    <Button size="sm" onClick={() => edit(p)}>Éditer</Button>
+                    <Button size="sm" variant="destructive" onClick={() => del(p.id)}>
+                      Supprimer
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </CardContent>
       </Card>
 

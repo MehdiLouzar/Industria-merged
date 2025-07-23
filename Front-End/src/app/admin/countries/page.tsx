@@ -68,16 +68,30 @@ export default function CountriesAdmin() {
     <div className="p-4 space-y-6">
       <h1 className="text-xl font-bold">Gestion des Pays</h1>
       <Card>
-        <CardContent className="divide-y">
-          {items.map(c => (
-            <div key={c.id} className="flex justify-between items-center py-2">
-              <span>{c.name} ({c.code})</span>
-              <div className="space-x-2">
-                <Button size="sm" onClick={() => edit(c)}>Éditer</Button>
-                <Button size="sm" variant="destructive" onClick={() => del(c.id)}>Supprimer</Button>
-              </div>
-            </div>
-          ))}
+        <CardContent className="overflow-x-auto p-0">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-left">
+                <th className="p-2">Nom</th>
+                <th className="p-2">Code</th>
+                <th className="p-2 w-32"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((c) => (
+                <tr key={c.id} className="border-b last:border-0">
+                  <td className="p-2 align-top">{c.name}</td>
+                  <td className="p-2 align-top">{c.code}</td>
+                  <td className="p-2 space-x-2 whitespace-nowrap">
+                    <Button size="sm" onClick={() => edit(c)}>Éditer</Button>
+                    <Button size="sm" variant="destructive" onClick={() => del(c.id)}>
+                      Supprimer
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </CardContent>
       </Card>
 
