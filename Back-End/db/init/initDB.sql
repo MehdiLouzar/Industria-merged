@@ -6,17 +6,17 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Optional tables to store Lambert coordinates for drawing polygons
 CREATE TABLE IF NOT EXISTS zone_vertices (
-  zone_id TEXT NOT NULL REFERENCES zones(id) ON DELETE CASCADE,
+  "zoneId" TEXT NOT NULL REFERENCES zones(id) ON DELETE CASCADE,
   seq INT NOT NULL,
-  lambertX FLOAT NOT NULL,
-  lambertY FLOAT NOT NULL
+  "lambertX" FLOAT NOT NULL,
+  "lambertY" FLOAT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS parcel_vertices (
-  parcel_id TEXT NOT NULL REFERENCES parcels(id) ON DELETE CASCADE,
+  "parcelId" TEXT NOT NULL REFERENCES parcels(id) ON DELETE CASCADE,
   seq INT NOT NULL,
-  lambertX FLOAT NOT NULL,
-  lambertY FLOAT NOT NULL
+  "lambertX" FLOAT NOT NULL,
+  "lambertY" FLOAT NOT NULL
 );
 
 -- Clean tables in order
@@ -40,10 +40,13 @@ BEGIN
 END $$;
 
 -- Demo users
-INSERT INTO users (id, email, password, name, company, phone, role) VALUES
-  ('user-admin',   'admin@zonespro.ma',   '$2b$10$VQl88VBIZ6aR46F7Ju2sgO0LH8oTFbm0Mb8ayY1KeuU261EfwEnZS', 'Administrateur ZonesPro', 'ZonesPro Management', '+212 5 37 57 20 00', 'ADMIN'),
-  ('user-manager', 'manager@zonespro.ma', '$2b$10$VQl88VBIZ6aR46F7Ju2sgO0LH8oTFbm0Mb8ayY1KeuU261EfwEnZS', 'Manager Commercial',       'ZonesPro Management', '+212 5 37 57 20 01', 'MANAGER'),
-  ('user-demo',    'demo@entreprise.ma',  '$2b$10$VQl88VBIZ6aR46F7Ju2sgO0LH8oTFbm0Mb8ayY1KeuU261EfwEnZS', 'Utilisateur Démo',         'Entreprise Démo SA',   '+212 6 12 34 56 78', 'USER')
+INSERT INTO users (
+  id, email, password, name, company, phone, role,
+  "createdAt", "updatedAt"
+) VALUES
+  ('user-admin',   'admin@zonespro.ma',   '$2b$10$VQl88VBIZ6aR46F7Ju2sgO0LH8oTFbm0Mb8ayY1KeuU261EfwEnZS', 'Administrateur ZonesPro', 'ZonesPro Management', '+212 5 37 57 20 00', 'ADMIN',   NOW(), NOW()),
+  ('user-manager', 'manager@zonespro.ma', '$2b$10$VQl88VBIZ6aR46F7Ju2sgO0LH8oTFbm0Mb8ayY1KeuU261EfwEnZS', 'Manager Commercial',       'ZonesPro Management', '+212 5 37 57 20 01', 'MANAGER', NOW(), NOW()),
+  ('user-demo',    'demo@entreprise.ma',  '$2b$10$VQl88VBIZ6aR46F7Ju2sgO0LH8oTFbm0Mb8ayY1KeuU261EfwEnZS', 'Utilisateur Démo',         'Entreprise Démo SA',   '+212 6 12 34 56 78', 'USER',    NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- Country and regions
@@ -76,8 +79,8 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Demo zone
 INSERT INTO zones (
-  id, name, description, address, totalArea, price, status,
-  latitude, longitude, lambertX, lambertY,
+  id, name, description, address, "totalArea", price, status,
+  latitude, longitude, "lambertX", "lambertY",
   "zoneTypeId", "regionId", "createdAt", "updatedAt"
 ) VALUES (
   'zone-demo',
@@ -99,7 +102,7 @@ INSERT INTO zones (
 -- Parcels for the demo zone
 INSERT INTO parcels (
   id, reference, area, price, status,
-  latitude, longitude, lambertX, lambertY,
+  latitude, longitude, "lambertX", "lambertY",
   "zoneId", "createdAt", "updatedAt"
 ) VALUES
   ('parcel-1', 'CAS-001', 10000, 2500, 'AVAILABLE', 33.617, -7.615, 423457, 372891, 'zone-demo', NOW(), NOW()),
@@ -107,14 +110,14 @@ INSERT INTO parcels (
 ON CONFLICT (id) DO NOTHING;
 
 -- Lambert polygon vertices for the demo zone
-INSERT INTO zone_vertices (zone_id, seq, lambertX, lambertY) VALUES
+INSERT INTO zone_vertices ("zoneId", seq, "lambertX", "lambertY") VALUES
   ('zone-demo', 1, 423400, 372800),
   ('zone-demo', 2, 423600, 372800),
   ('zone-demo', 3, 423600, 373000),
   ('zone-demo', 4, 423400, 373000)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO parcel_vertices (parcel_id, seq, lambertX, lambertY) VALUES
+INSERT INTO parcel_vertices ("parcelId", seq, "lambertX", "lambertY") VALUES
   ('parcel-1', 1, 423450, 372880),
   ('parcel-1', 2, 423480, 372880),
   ('parcel-1', 3, 423480, 372910),
@@ -139,8 +142,8 @@ ON CONFLICT (id) DO NOTHING;
 -- Additional demo zones generated from Lambert polygons
 -- Zone PIAJ
 INSERT INTO zones (
-  id, name, description, totalArea, price, status,
-  latitude, longitude, lambertX, lambertY,
+  id, name, description, "totalArea", price, status,
+  latitude, longitude, "lambertX", "lambertY",
   "zoneTypeId", "regionId", "createdAt", "updatedAt"
 ) VALUES (
   'zone-piaj', 'PIAJ', 'Zone générée automatiquement pour les tests',
@@ -150,7 +153,7 @@ INSERT INTO zones (
   'zt-private', 'region-rab', NOW(), NOW()
 ) ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO zone_vertices (zone_id, seq, lambertX, lambertY) VALUES
+INSERT INTO zone_vertices ("zoneId", seq, "lambertX", "lambertY") VALUES
   ('zone-piaj', 1, 409201.18, 369451.53),
   ('zone-piaj', 2, 409639.39, 368996.57),
   ('zone-piaj', 3, 409763.12, 368701.53),
@@ -184,8 +187,8 @@ ON CONFLICT DO NOTHING;
 
 -- Zone ZAINA
 INSERT INTO zones (
-  id, name, description, totalArea, price, status,
-  latitude, longitude, lambertX, lambertY,
+  id, name, description, "totalArea", price, status,
+  latitude, longitude, "lambertX", "lambertY",
   "zoneTypeId", "regionId", "createdAt", "updatedAt"
 ) VALUES (
   'zone-zaina', 'ZAINA', 'Zone générée automatiquement pour les tests',
@@ -195,7 +198,7 @@ INSERT INTO zones (
   'zt-private', 'region-rab', NOW(), NOW()
 ) ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO zone_vertices (zone_id, seq, lambertX, lambertY) VALUES
+INSERT INTO zone_vertices ("zoneId", seq, "lambertX", "lambertY") VALUES
   ('zone-zaina', 1, 356080.37, 362485.7),
   ('zone-zaina', 2, 356300.3, 362622.77),
   ('zone-zaina', 3, 356362.67, 362678.46),
@@ -221,8 +224,8 @@ ON CONFLICT DO NOTHING;
 
 -- Zone OTTAWA
 INSERT INTO zones (
-  id, name, description, totalArea, price, status,
-  latitude, longitude, lambertX, lambertY,
+  id, name, description, "totalArea", price, status,
+  latitude, longitude, "lambertX", "lambertY",
   "zoneTypeId", "regionId", "createdAt", "updatedAt"
 ) VALUES (
   'zone-ottawa', 'OTTAWA', 'Zone générée automatiquement pour les tests',
@@ -232,7 +235,7 @@ INSERT INTO zones (
   'zt-private', 'region-rab', NOW(), NOW()
 ) ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO zone_vertices (zone_id, seq, lambertX, lambertY) VALUES
+INSERT INTO zone_vertices ("zoneId", seq, "lambertX", "lambertY") VALUES
   ('zone-ottawa', 1, 351900.19, 363533.59),
   ('zone-ottawa', 2, 351989.68, 363531.3),
   ('zone-ottawa', 3, 351988.73, 363461.25),
