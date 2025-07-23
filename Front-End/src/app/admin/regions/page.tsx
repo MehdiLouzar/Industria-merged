@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getBaseUrl } from '@/lib/utils'
+import { getBaseUrl, fetchApi } from '@/lib/utils'
 import {
   Select,
   SelectTrigger,
@@ -39,13 +39,12 @@ export default function RegionsAdmin() {
   }, [session])
 
   async function load() {
-    const base = getBaseUrl()
-    const [r1, r2] = await Promise.all([
-      fetch(`${base}/api/regions`),
-      fetch(`${base}/api/countries`),
+    const [r, c] = await Promise.all([
+      fetchApi<Region[]>('/api/regions'),
+      fetchApi<{ id: string; name: string }[]>('/api/countries'),
     ])
-    if (r1.ok) setItems(await r1.json())
-    if (r2.ok) setCountries(await r2.json())
+    if (r) setItems(r)
+    if (c) setCountries(c)
   }
   useEffect(() => { load() }, [])
 

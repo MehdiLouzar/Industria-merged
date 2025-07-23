@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getBaseUrl } from '@/lib/utils'
+import { getBaseUrl, fetchApi } from '@/lib/utils'
 import {
   Select,
   SelectTrigger,
@@ -105,19 +105,18 @@ export default function ZonesAdmin() {
   }, [session])
 
   async function load() {
-    const base = getBaseUrl()
-    const [r1, r2, r3, r4, r5] = await Promise.all([
-      fetch(`${base}/api/zones`),
-      fetch(`${base}/api/zone-types`),
-      fetch(`${base}/api/regions`),
-      fetch(`${base}/api/activities`),
-      fetch(`${base}/api/amenities`),
+    const [z, t, r, a, m] = await Promise.all([
+      fetchApi<Zone[]>('/api/zones'),
+      fetchApi<{ id: string; name: string }[]>('/api/zone-types'),
+      fetchApi<{ id: string; name: string }[]>('/api/regions'),
+      fetchApi<{ id: string; name: string }[]>('/api/activities'),
+      fetchApi<{ id: string; name: string }[]>('/api/amenities'),
     ])
-    if (r1.ok) setZones(await r1.json())
-    if (r2.ok) setZoneTypes(await r2.json())
-    if (r3.ok) setRegions(await r3.json())
-    if (r4.ok) setActivities(await r4.json())
-    if (r5.ok) setAmenities(await r5.json())
+    if (z) setZones(z)
+    if (t) setZoneTypes(t)
+    if (r) setRegions(r)
+    if (a) setActivities(a)
+    if (m) setAmenities(m)
   }
   useEffect(() => { load() }, [])
 

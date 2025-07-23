@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getBaseUrl } from '@/lib/utils'
+import { getBaseUrl, fetchApi } from '@/lib/utils'
 
 interface ZoneType {
   id: string
@@ -27,8 +27,8 @@ export default function ZoneTypesAdmin() {
   }, [session])
 
   async function load() {
-    const res = await fetch(`${getBaseUrl()}/api/zone-types`)
-    if (res.ok) setItems(await res.json())
+    const items = await fetchApi<ZoneType[]>('/api/zone-types')
+    if (items) setItems(items)
   }
   useEffect(() => { load() }, [])
 

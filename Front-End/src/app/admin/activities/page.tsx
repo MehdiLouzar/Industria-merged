@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getBaseUrl } from '@/lib/utils'
+import { getBaseUrl, fetchApi } from '@/lib/utils'
 
 interface Activity {
   id: string
@@ -32,9 +32,8 @@ export default function ActivitiesAdmin() {
   useEffect(() => { if (session && session.user.role !== 'ADMIN') router.push('/auth/login') }, [session])
 
   async function load() {
-    const base = getBaseUrl()
-    const res = await fetch(`${base}/api/activities`)
-    if (res.ok) setItems(await res.json())
+    const items = await fetchApi<Activity[]>('/api/activities')
+    if (items) setItems(items)
   }
   useEffect(() => { load() }, [])
 

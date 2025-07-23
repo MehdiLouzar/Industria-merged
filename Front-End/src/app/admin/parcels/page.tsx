@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getBaseUrl } from '@/lib/utils'
+import { getBaseUrl, fetchApi } from '@/lib/utils'
 import {
   Select,
   SelectTrigger,
@@ -77,13 +77,12 @@ export default function ParcelsAdmin() {
   useEffect(() => { if (session && session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') router.push('/auth/login') }, [session])
 
   async function load() {
-    const base = getBaseUrl()
-    const [r1, r2] = await Promise.all([
-      fetch(`${base}/api/parcels`),
-      fetch(`${base}/api/zones`),
+    const [p, z] = await Promise.all([
+      fetchApi<Parcel[]>('/api/parcels'),
+      fetchApi<{ id: string; name: string }[]>('/api/zones'),
     ])
-    if (r1.ok) setItems(await r1.json())
-    if (r2.ok) setZones(await r2.json())
+    if (p) setItems(p)
+    if (z) setZones(z)
   }
   useEffect(() => { load() }, [])
 

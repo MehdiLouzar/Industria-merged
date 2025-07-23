@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getBaseUrl } from '@/lib/utils'
+import { getBaseUrl, fetchApi } from '@/lib/utils'
 import {
   Select,
   SelectTrigger,
@@ -48,8 +48,8 @@ export default function UsersAdmin() {
   useEffect(() => { if (session && session.user.role !== 'ADMIN') router.push('/auth/login') }, [session])
 
   async function load() {
-    const res = await fetch(`${getBaseUrl()}/api/users`)
-    if (res.ok) setItems(await res.json())
+    const users = await fetchApi<User[]>('/api/users')
+    if (users) setItems(users)
   }
   useEffect(() => { load() }, [])
 

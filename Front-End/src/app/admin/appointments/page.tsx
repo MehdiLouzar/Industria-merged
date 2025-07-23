@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getBaseUrl } from '@/lib/utils'
+import { getBaseUrl, fetchApi } from '@/lib/utils'
 import {
   Select,
   SelectTrigger,
@@ -52,13 +52,12 @@ export default function AppointmentsAdmin() {
   useEffect(() => { if (session && session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') router.push('/auth/login') }, [session])
 
   async function load() {
-    const base = getBaseUrl()
-    const [r1, r2] = await Promise.all([
-      fetch(`${base}/api/appointments`),
-      fetch(`${base}/api/parcels`),
+    const [a, p] = await Promise.all([
+      fetchApi<Appointment[]>('/api/appointments'),
+      fetchApi<{ id: string; reference: string }[]>('/api/parcels'),
     ])
-    if (r1.ok) setItems(await r1.json())
-    if (r2.ok) setParcels(await r2.json())
+    if (a) setItems(a)
+    if (p) setParcels(p)
   }
   useEffect(() => { load() }, [])
 

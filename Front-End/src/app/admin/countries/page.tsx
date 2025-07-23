@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getBaseUrl } from '@/lib/utils'
+import { getBaseUrl, fetchApi } from '@/lib/utils'
 
 interface Country {
   id: string
@@ -30,9 +30,8 @@ export default function CountriesAdmin() {
   }, [session])
 
   async function load() {
-    const base = getBaseUrl()
-    const res = await fetch(`${base}/api/countries`)
-    if (res.ok) setItems(await res.json())
+    const items = await fetchApi<Country[]>('/api/countries')
+    if (items) setItems(items)
   }
   useEffect(() => { load() }, [])
 
