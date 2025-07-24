@@ -1,6 +1,6 @@
 import { applyCors, corsOptions } from "@/lib/cors";
 import { prisma } from "@/lib/prisma";
-import { lambertToWGS84 } from "@/lib/coords";
+import { lambertToWGS84, polygonCentroid } from "@/lib/coords";
 
 export async function GET() {
   const zones = await prisma.zone.findMany({
@@ -18,15 +18,14 @@ export async function GET() {
   });
 
   const features = zones.map(z => {
-    let point: [number, number] | null = null;
+    let point: [number, number] | null = null
     if (z.vertices.length) {
-      const sum = z.vertices.reduce(
-        (acc, v) => [acc[0] + v.lambertX, acc[1] + v.lambertY],
-        [0, 0]
-      );
-      point = [sum[0] / z.vertices.length, sum[1] / z.vertices.length];
-    } else if (z.lambertX != null && z.lambertY != null) {
-      point = [z.lambertX, z.lambertY];
+      const verts = z.vertices.sort((a, b) => a.seq - b.seq)
+      const c = polygonCentroid(verts)
+      if (c) point = c
+    }
+    if (!point && z.lambertX != null && z.lambertY != null) {
+      point = [z.lambertX, z.lambertY]
     }
     if (!point) return null;
     const [lat, lon] = lambertToWGS84(point[0], point[1]);
