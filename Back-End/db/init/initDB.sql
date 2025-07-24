@@ -4,6 +4,13 @@
 CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+-- Ensure newer columns exist when the database was created from an older schema
+ALTER TABLE parcels
+  ADD COLUMN IF NOT EXISTS "isFree" BOOLEAN DEFAULT TRUE,
+  ADD COLUMN IF NOT EXISTS "isShowroom" BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS cos FLOAT,
+  ADD COLUMN IF NOT EXISTS cus FLOAT;
+
 -- Optional tables to store Lambert coordinates for drawing polygons
 CREATE TABLE IF NOT EXISTS zone_vertices (
   "zoneId" TEXT NOT NULL REFERENCES zones(id) ON DELETE CASCADE,
