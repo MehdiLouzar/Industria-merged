@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { Phone, Calendar, Mail, Facebook, Youtube, Instagram, Twitter, Building2 } from 'lucide-react';
 import AppointmentForm from './AppointmentForm';
 
@@ -10,38 +9,6 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
   const [showForm, setShowForm] = useState(false);
 
-  const productLinks = [
-    { title: 'Zones Industrielles', href: '/zones' },
-    { title: 'Parcs Logistiques', href: '/logistique' },
-    { title: 'Zones Franches', href: '/zones-franches' },
-    { title: 'Catalogues', href: '/catalogues' },
-  ];
-
-  const serviceLinks = [
-    { title: 'Service Client B2B', href: '/support' },
-    { title: 'Prise de Rendez-vous', href: '/rdv' },
-    { title: 'Simulation de Coûts', href: '/simulation' },
-    { title: 'Demandes d\'Informations', href: '/contact' },
-    { title: 'Appels d\'Offres', href: '/offres' },
-  ];
-
-  const supportLinks = [
-    { title: 'Déposer une Demande', href: '/support/demande' },
-    { title: 'Suivi des Demandes', href: '/support/suivi' },
-  ];
-
-  const networkLinks = [
-    { title: 'Région Casablanca-Settat', href: '/casablanca' },
-    { title: 'Région Rabat-Salé-Kénitra', href: '/rabat' },
-    { title: 'Région Fès-Meknès', href: '/fes' },
-    { title: 'Région Marrakech-Safi', href: '/marrakech' },
-    { title: 'Région Tanger-Tétouan', href: '/tanger' },
-    { title: 'Région Souss-Massa', href: '/agadir' },
-    { title: 'Région Oriental', href: '/oriental' },
-    { title: 'Région Darâa-Tafilalet', href: '/daraa' },
-    { title: 'Région Beni Mellal-Khénifra', href: '/beni-mellal' },
-    { title: 'Région Rabat-Salé-Kénitra', href: '/rabat' },
-  ];
 
   const mediaLinks = [
     { title: 'Communiqués de presse', href: '/media/communiques' },
@@ -86,67 +53,6 @@ export default function Footer() {
 
       {/* Main footer content */}
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Nos Zones */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Nos Zones</h3>
-            <ul className="space-y-2">
-              {productLinks.map((link, index) => (
-                <li key={index}>
-                  <a href={link.href} className="text-gray-300 hover:text-white transition-colors text-sm">
-                    {link.title}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Services B2B */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Services B2B</h3>
-            <ul className="space-y-2">
-              {serviceLinks.map((link, index) => (
-                <li key={index}>
-                  <a href={link.href} className="text-gray-300 hover:text-white transition-colors text-sm">
-                    {link.title}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Support</h3>
-            <ul className="space-y-2">
-              {supportLinks.map((link, index) => (
-                <li key={index}>
-                  <a href={link.href} className="text-gray-300 hover:text-white transition-colors text-sm">
-                    {link.title}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Notre Réseau */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Notre Réseau</h3>
-            <ul className="space-y-2 max-h-48 overflow-y-auto">
-              {networkLinks.map((link, index) => (
-                <li key={index}>
-                  <a href={link.href} className="text-gray-300 hover:text-white transition-colors text-sm">
-                    {link.title}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <Separator className="my-8 bg-gray-600" />
-
-        {/* Second row */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Média */}
           <div>
@@ -224,9 +130,6 @@ export default function Footer() {
               <a href="/actualites" className="text-gray-300 hover:text-white">Actualités</a>
               <a href="/evenements" className="text-gray-300 hover:text-white">Événements</a>
               <a href="/mediatheque" className="text-gray-300 hover:text-white">Médiathèque</a>
-              <a href="/contact" className="text-gray-300 hover:text-white">Contactez nous</a>
-              <a href="/sitemap" className="text-gray-300 hover:text-white">Plan de site</a>
-              <a href="/faq" className="text-gray-300 hover:text-white">FAQ</a>
             </div>
           </div>
         </div>
