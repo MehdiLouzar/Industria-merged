@@ -30,6 +30,10 @@ interface Parcel {
   area?: number | null
   price?: number | null
   status: string
+  isFree?: boolean | null
+  isShowroom?: boolean | null
+  cos?: number | null
+  cus?: number | null
   latitude?: number | null
   longitude?: number | null
   lambertX?: number | null
@@ -44,6 +48,10 @@ interface ParcelForm {
   area: string
   price: string
   status: string
+  isFree: boolean
+  isShowroom: boolean
+  cos: string
+  cus: string
   latitude: string
   longitude: string
   lambertX: string
@@ -68,6 +76,10 @@ export default function ParcelsAdmin() {
     area: '',
     price: '',
     status: 'AVAILABLE',
+    isFree: true,
+    isShowroom: false,
+    cos: '',
+    cus: '',
     latitude: '',
     longitude: '',
     lambertX: '',
@@ -94,6 +106,10 @@ export default function ParcelsAdmin() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.checked })
   }
 
   const handleStatus = (value: string) => {
@@ -157,6 +173,10 @@ export default function ParcelsAdmin() {
       area: form.area ? parseFloat(form.area) : undefined,
       price: form.price ? parseFloat(form.price) : undefined,
       status: form.status,
+      isFree: form.isFree,
+      isShowroom: form.isShowroom,
+      cos: form.cos ? parseFloat(form.cos) : undefined,
+      cus: form.cus ? parseFloat(form.cus) : undefined,
       latitude: form.latitude ? parseFloat(form.latitude) : undefined,
       longitude: form.longitude ? parseFloat(form.longitude) : undefined,
       lambertX: form.lambertX ? parseFloat(form.lambertX) : undefined,
@@ -189,6 +209,10 @@ export default function ParcelsAdmin() {
       area: '',
       price: '',
       status: 'AVAILABLE',
+      isFree: true,
+      isShowroom: false,
+      cos: '',
+      cus: '',
       latitude: '',
       longitude: '',
       lambertX: '',
@@ -208,6 +232,10 @@ export default function ParcelsAdmin() {
       area: it.area?.toString() ?? '',
       price: it.price?.toString() ?? '',
       status: it.status,
+      isFree: it.isFree ?? true,
+      isShowroom: it.isShowroom ?? false,
+      cos: it.cos?.toString() ?? '',
+      cus: it.cus?.toString() ?? '',
       latitude: it.latitude?.toString() ?? '',
       longitude: it.longitude?.toString() ?? '',
       lambertX: it.lambertX?.toString() ?? '',
@@ -233,6 +261,10 @@ export default function ParcelsAdmin() {
       area: '',
       price: '',
       status: 'AVAILABLE',
+      isFree: true,
+      isShowroom: false,
+      cos: '',
+      cus: '',
       latitude: '',
       longitude: '',
       lambertX: '',
@@ -327,6 +359,26 @@ export default function ParcelsAdmin() {
               <div>
                 <Label htmlFor="lambertY">Lambert Y</Label>
                 <Input id="lambertY" name="lambertY" value={form.lambertY} onChange={handleChange} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="isFree" name="isFree" checked={form.isFree} onChange={handleToggle} />
+                <Label htmlFor="isFree">Libre</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="isShowroom" name="isShowroom" checked={form.isShowroom} onChange={handleToggle} />
+                <Label htmlFor="isShowroom">Showroom</Label>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="cos">CoS</Label>
+                <Input id="cos" name="cos" value={form.cos} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="cus">CuS</Label>
+                <Input id="cus" name="cus" value={form.cus} onChange={handleChange} />
               </div>
             </div>
             <div>

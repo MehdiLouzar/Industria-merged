@@ -9,6 +9,11 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const data = await req.json();
+    if (!data.parcelId) throw new Error('parcel required');
+    const parcel = await prisma.parcel.findUnique({ where: { id: data.parcelId } });
+    if (!parcel || parcel.status !== 'AVAILABLE' || !parcel.isFree) {
+      return applyCors(new Response('Parcel not available', { status: 400 }));
+    }
     const item = await prisma.appointment.create({ data });
     return applyCors(Response.json(item, { status: 201 }));
   } catch {

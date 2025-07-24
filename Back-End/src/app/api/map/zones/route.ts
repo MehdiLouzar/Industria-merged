@@ -9,7 +9,7 @@ export async function GET() {
       latitude: true,
       longitude: true,
       status: true,
-      parcels: { select: { status: true } },
+      parcels: { select: { status: true, isFree: true } },
       activities: { select: { activity: { select: { icon: true } } } },
     },
   });
@@ -23,7 +23,7 @@ export async function GET() {
         id: z.id,
         name: z.name,
         status: z.status,
-        availableParcels: z.parcels.filter(p => p.status === 'AVAILABLE').length,
+        availableParcels: z.parcels.filter(p => p.status === 'AVAILABLE' && p.isFree).length,
         activityIcons: z.activities.map(a => a.activity.icon).filter(Boolean),
       }
     }));

@@ -42,9 +42,10 @@ export default function ZoneGrid() {
     switch (status) {
       case 'RESERVED':
         return 'Réservé';
-      case 'UNDER_DEVELOPMENT':
-      case 'PARTIALLY_OCCUPIED':
-        return 'En cours';
+      case 'OCCUPIED':
+        return 'Occupé';
+      case 'SHOWROOM':
+        return 'Showroom';
       default:
         return 'Disponible';
     }
@@ -81,12 +82,12 @@ export default function ZoneGrid() {
     switch (status) {
       case 'Disponible':
         return 'bg-green-100 text-green-800';
-      case 'Nouveau':
+      case 'Showroom':
         return 'bg-blue-100 text-blue-800';
-      case 'En cours':
-        return 'bg-orange-100 text-orange-800';
+      case 'Occupé':
+        return 'bg-gray-100 text-gray-800';
       case 'Réservé':
-        return 'bg-red-100 text-red-800';
+        return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }

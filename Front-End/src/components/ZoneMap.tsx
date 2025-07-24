@@ -10,6 +10,7 @@ interface Parcel {
   id: string;
   reference: string;
   status: string;
+  isFree?: boolean;
   latitude: number | null;
   longitude: number | null;
   area?: number | null;
@@ -67,10 +68,9 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
 
   const zoneColor: Record<string, string> = {
     AVAILABLE: "green",
-    PARTIALLY_OCCUPIED: "orange",
-    FULLY_OCCUPIED: "red",
-    UNDER_DEVELOPMENT: "gray",
-    RESERVED: "red",
+    RESERVED: "orange",
+    OCCUPIED: "red",
+    SHOWROOM: "blue",
   };
 
   const parcelColor = (s: string) => {
@@ -125,7 +125,7 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
                     {p.area && <div>Surface: {p.area} m²</div>}
                     {p.price && <div>Prix: {p.price} DH</div>}
                     <div>Statut: {p.status}</div>
-                    {p.status === "AVAILABLE" && (
+                    {p.status === "AVAILABLE" && p.isFree && (
                       <Button
                         size="sm"
                         className="mt-1"

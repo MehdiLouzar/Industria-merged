@@ -64,10 +64,9 @@ interface ZoneForm {
 
 const statuses = [
   'AVAILABLE',
-  'PARTIALLY_OCCUPIED',
-  'FULLY_OCCUPIED',
-  'UNDER_DEVELOPMENT',
   'RESERVED',
+  'OCCUPIED',
+  'SHOWROOM',
 ]
 
 export default function ZonesAdmin() {

@@ -102,11 +102,12 @@ INSERT INTO zones (
 -- Parcels for the demo zone
 INSERT INTO parcels (
   id, reference, area, price, status,
+  "isFree", "isShowroom", cos, cus,
   latitude, longitude, "lambertX", "lambertY",
   "zoneId", "createdAt", "updatedAt"
 ) VALUES
-  ('parcel-1', 'CAS-001', 10000, 2500, 'AVAILABLE', 33.617, -7.615, 423457, 372891, 'zone-demo', NOW(), NOW()),
-  ('parcel-2', 'CAS-002', 12000, 2500, 'RESERVED', 33.618, -7.616, 423458, 372892, 'zone-demo', NOW(), NOW())
+  ('parcel-1', 'CAS-001', 10000, 2500, 'AVAILABLE', true, false, NULL, NULL, 33.617, -7.615, 423457, 372891, 'zone-demo', NOW(), NOW()),
+  ('parcel-2', 'CAS-002', 12000, 2500, 'RESERVED', true, false, NULL, NULL, 33.618, -7.616, 423458, 372892, 'zone-demo', NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- Lambert polygon vertices for the demo zone

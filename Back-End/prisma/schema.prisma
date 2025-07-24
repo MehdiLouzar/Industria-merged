@@ -109,10 +109,9 @@ model Zone {
 
 enum ZoneStatus {
   AVAILABLE
-  PARTIALLY_OCCUPIED
-  FULLY_OCCUPIED
-  UNDER_DEVELOPMENT
   RESERVED
+  OCCUPIED
+  SHOWROOM
 }
 
 // Modèle Parcel (Parcelle)
@@ -122,6 +121,10 @@ model Parcel {
   area        Float // en m²
   price       Float? // prix total ou par m²
   status      ParcelStatus @default(AVAILABLE)
+  isFree      Boolean      @default(true)
+  isShowroom  Boolean      @default(false)
+  cos         Float?
+  cus         Float?
 
   // Coordonnées géographiques
   latitude    Float?
