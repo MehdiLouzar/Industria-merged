@@ -31,10 +31,10 @@ interface Zone {
 export default function ZoneMap({ zone }: { zone: Zone }) {
   const [selected, setSelected] = useState<Parcel | null>(null);
 
-  const lambert93 =
-    '+proj=lcc +lat_1=44 +lat_2=49 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs';
+  const lambertMA =
+    '+proj=lcc +lat_1=33.3 +lat_2=35.1 +lat_0=33 +lon_0=-5 +x_0=500000 +y_0=300000 +ellps=clrk80 +units=m +no_defs';
   const toLatLng = (x: number, y: number): [number, number] => {
-    const [lon, lat] = proj4(lambert93, proj4.WGS84, [x, y]);
+    const [lon, lat] = proj4(lambertMA, proj4.WGS84, [x, y]);
     return [lat, lon];
   };
 
@@ -96,7 +96,7 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
         style={{ height: 350, width: "100%" }}
       >
         <TileLayer
-          url={`https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`}
+          url={`https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?language=fr&worldview=MA&access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`}
           id="mapbox/streets-v11"
         />
         <Polygon
