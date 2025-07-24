@@ -1,3 +1,4 @@
+import { applyCors, corsOptions } from "@/lib/cors";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
@@ -13,5 +14,9 @@ export async function GET() {
       properties: { id: p.id, reference: p.reference, zoneId: p.zoneId }
     }));
 
-  return Response.json({ type: "FeatureCollection", features });
+  return applyCors(Response.json({ type: "FeatureCollection", features }));
+}
+
+export function OPTIONS() {
+  return corsOptions();
 }

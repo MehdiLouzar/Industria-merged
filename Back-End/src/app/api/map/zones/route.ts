@@ -1,3 +1,4 @@
+import { applyCors, corsOptions } from "@/lib/cors";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
@@ -8,6 +9,8 @@ export async function GET() {
       latitude: true,
       longitude: true,
       status: true,
+      parcels: { select: { status: true, isFree: true } },
+      activities: { select: { activity: { select: { icon: true } } } },
     },
   });
 
@@ -16,8 +19,18 @@ export async function GET() {
     .map(z => ({
       type: "Feature",
       geometry: { type: "Point", coordinates: [z.longitude, z.latitude] },
-      properties: { id: z.id, name: z.name, status: z.status }
+      properties: {
+        id: z.id,
+        name: z.name,
+        status: z.status,
+        availableParcels: z.parcels.filter(p => p.status === 'AVAILABLE' && p.isFree).length,
+        activityIcons: z.activities.map(a => a.activity.icon).filter(Boolean),
+      }
     }));
 
-  return Response.json({ type: "FeatureCollection", features });
+  return applyCors(Response.json({ type: "FeatureCollection", features }));
+}
+
+export function OPTIONS() {
+  return corsOptions();
 }

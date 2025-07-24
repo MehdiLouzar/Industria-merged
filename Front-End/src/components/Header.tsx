@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -8,45 +9,33 @@ import { Badge } from '@/components/ui/badge';
 import { Menu, Phone, MapPin, Building2 } from 'lucide-react';
 import AuthButton from '@/components/AuthButton';
 
-export default function Header() {
+export default function Header({ showAdminLink = false }: { showAdminLink?: boolean }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const mediaLinks = [
+    { title: 'Communiqués de presse', href: '/media/communiques' },
+    { title: 'Actualités', href: '/media/actualites' },
+    { title: 'Rapports', href: '/media/rapports' },
+  ];
+
+  const groupLinks = [
+    { title: 'À propos', href: '/groupe/a-propos' },
+    { title: 'Chiffres clés', href: '/groupe/chiffres' },
+    { title: 'Engagement citoyen', href: '/groupe/engagement' },
+    { title: 'Offre d\'emplois', href: '/groupe/emplois' },
+    { title: 'Candidature', href: '/groupe/candidature' },
+    { title: 'Politique de recrutement', href: '/groupe/recrutement' },
+  ];
 
   const navItems = [
     {
-      title: 'Nos Zones',
-      items: [
-        { title: 'Zones Industrielles', href: '/zones' },
-        { title: 'Parcs Logistiques', href: '/logistique' },
-        { title: 'Zones Franches', href: '/zones-franches' },
-        { title: 'Catalogues', href: '/catalogues' },
-      ]
+      title: 'Média',
+      items: mediaLinks,
     },
     {
-      title: 'Services B2B',
-      items: [
-        { title: 'Prise de Rendez-vous', href: '/rdv' },
-        { title: 'Simulation de Coûts', href: '/simulation' },
-        { title: 'Demande d\'Informations', href: '/contact' },
-        { title: 'Appels d\'Offres', href: '/offres' },
-      ]
+      title: 'Le Groupe',
+      items: groupLinks,
     },
-    {
-      title: 'Support',
-      items: [
-        { title: 'Service Client', href: '/support' },
-        { title: 'Suivi des Demandes', href: '/suivi' },
-      ]
-    },
-    {
-      title: 'Notre Réseau',
-      items: [
-        { title: 'Région Casablanca-Settat', href: '/casablanca' },
-        { title: 'Région Rabat-Salé-Kénitra', href: '/rabat' },
-        { title: 'Région Fès-Meknès', href: '/fes' },
-        { title: 'Région Marrakech-Safi', href: '/marrakech' },
-        { title: 'Région Tanger-Tétouan', href: '/tanger' },
-      ]
-    }
   ];
 
   return (
@@ -114,7 +103,12 @@ export default function Header() {
             </NavigationMenu>
 
             {/* Authentication section */}
-            <div className="hidden md:flex">
+            <div className="hidden md:flex items-center gap-4">
+              {showAdminLink && (
+                <Link href="/admin" className="text-sm text-gray-700 hover:text-red-600">
+                  Dashboard admin
+                </Link>
+              )}
               <AuthButton />
             </div>
 
@@ -128,7 +122,16 @@ export default function Header() {
               <SheetContent side="right">
                 <div className="space-y-4 py-4">
                   {/* Mobile Auth */}
-                  <div className="pb-4 border-b">
+                  <div className="pb-4 border-b space-y-2">
+                    {showAdminLink && (
+                      <a
+                        href="/admin"
+                        className="block text-sm text-gray-600 hover:text-red-600"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Dashboard admin
+                      </a>
+                    )}
                     <AuthButton />
                   </div>
 

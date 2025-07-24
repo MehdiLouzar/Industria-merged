@@ -233,7 +233,7 @@ async function main() {
         address: 'Zone Industrielle, Mohammedia',
         totalArea: 200000, // 20 hectares
         price: 1800,
-        status: ZoneStatus.PARTIALLY_OCCUPIED,
+        status: ZoneStatus.OCCUPIED,
         latitude: 33.6864,
         longitude: -7.3737,
         lambertX: 445123.45,
@@ -265,7 +265,7 @@ async function main() {
         address: 'Technopolis, Salé',
         totalArea: 80000, // 8 hectares
         price: 4000,
-        status: ZoneStatus.UNDER_DEVELOPMENT,
+        status: ZoneStatus.RESERVED,
         latitude: 34.0209,
         longitude: -6.8416,
         lambertX: 467890.23,
@@ -289,6 +289,10 @@ async function main() {
         area: 5000 + Math.random() * 10000, // 5000-15000 m²
         price: 2500,
         status: i <= 8 ? ParcelStatus.AVAILABLE : ParcelStatus.RESERVED,
+        isFree: true,
+        isShowroom: false,
+        cos: null,
+        cus: null,
         latitude: zones[0].latitude! + (Math.random() - 0.5) * 0.01,
         longitude: zones[0].longitude! + (Math.random() - 0.5) * 0.01,
         zoneId: zones[0].id,
@@ -305,6 +309,10 @@ async function main() {
         area: 8000 + Math.random() * 12000, // 8000-20000 m²
         price: 1800,
         status: i <= 10 ? ParcelStatus.AVAILABLE : ParcelStatus.OCCUPIED,
+        isFree: true,
+        isShowroom: false,
+        cos: null,
+        cus: null,
         latitude: zones[1].latitude! + (Math.random() - 0.5) * 0.01,
         longitude: zones[1].longitude! + (Math.random() - 0.5) * 0.01,
         zoneId: zones[1].id,
