@@ -1,9 +1,35 @@
 import { applyCors, corsOptions } from "@/lib/cors";
 import { prisma } from "@/lib/prisma";
+import { ZoneStatus } from "@prisma/client";
 import crypto from "crypto";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const where: any = {};
+  if (url.searchParams.get("regionId")) {
+    where.regionId = url.searchParams.get("regionId");
+  }
+  if (url.searchParams.get("zoneTypeId")) {
+    where.zoneTypeId = url.searchParams.get("zoneTypeId");
+  }
+  if (url.searchParams.get("status")) {
+    where.status = url.searchParams.get("status") as ZoneStatus;
+  }
+  if (url.searchParams.get("minArea")) {
+    where.totalArea = { gte: parseFloat(url.searchParams.get("minArea") as string) };
+  }
+  if (url.searchParams.get("maxArea")) {
+    where.totalArea = { ...(where.totalArea || {}), lte: parseFloat(url.searchParams.get("maxArea") as string) };
+  }
+  if (url.searchParams.get("minPrice")) {
+    where.price = { gte: parseFloat(url.searchParams.get("minPrice") as string) };
+  }
+  if (url.searchParams.get("maxPrice")) {
+    where.price = { ...(where.price || {}), lte: parseFloat(url.searchParams.get("maxPrice") as string) };
+  }
+
   const zones = await prisma.zone.findMany({
+    where,
     include: {
       parcels: { include: { vertices: true } },
       region: true,

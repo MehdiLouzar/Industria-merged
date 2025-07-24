@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -23,9 +24,10 @@ interface IndustrialZone {
 }
 
 export default function ZoneGrid() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
-  const [zones, setZones] = useState<IndustrialZone[]>([]);
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 12
+  const [zones, setZones] = useState<IndustrialZone[]>([])
+  const searchParams = useSearchParams()
 
   interface ZoneResponse {
     id: string;
@@ -53,10 +55,14 @@ export default function ZoneGrid() {
 
   useEffect(() => {
     async function load() {
-      const base = getBaseUrl();
-      const res = await fetch(`${base}/api/zones`);
-      if (!res.ok) return;
-      const data: ZoneResponse[] = await res.json();
+      const base = getBaseUrl()
+      const qs = new URLSearchParams()
+      searchParams.forEach((v, k) => {
+        qs.set(k, v)
+      })
+      const res = await fetch(`${base}/api/zones?${qs.toString()}`)
+      if (!res.ok) return
+      const data: ZoneResponse[] = await res.json()
       const mapped: IndustrialZone[] = data.map((z) => ({
         id: z.id,
         name: z.name,
@@ -69,10 +75,10 @@ export default function ZoneGrid() {
         image: 'https://source.unsplash.com/featured/?industrial',
         features: z.amenities?.map((a) => a.amenity.name) ?? [],
       }));
-      setZones(mapped);
+      setZones(mapped)
     }
-    load();
-  }, []);
+    load()
+  }, [searchParams])
 
   const totalPages = Math.ceil(zones.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
