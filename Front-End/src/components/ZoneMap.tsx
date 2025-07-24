@@ -39,10 +39,16 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
   };
 
   const center = zone.vertices && zone.vertices.length
-    ? toLatLng(zone.vertices[0].lambertX, zone.vertices[0].lambertY)
-    : zone.lambertX && zone.lambertY
+    ? (() => {
+        const sum = zone.vertices.reduce(
+          (acc, v) => [acc[0] + v.lambertX, acc[1] + v.lambertY],
+          [0, 0]
+        )
+        return toLatLng(sum[0] / zone.vertices.length, sum[1] / zone.vertices.length)
+      })()
+    : zone.lambertX != null && zone.lambertY != null
       ? toLatLng(zone.lambertX, zone.lambertY)
-      : [31.7, -6.5];
+      : [31.7, -6.5]
 
   const zonePolygon: [number, number][] = zone.vertices && zone.vertices.length
     ? zone.vertices
