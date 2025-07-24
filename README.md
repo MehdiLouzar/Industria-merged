@@ -51,13 +51,21 @@ without extra configuration.
 
 ### Manual database initialisation
 
-To execute the SQL script directly, run the helper inside `Back-End/scripts`.
-It automatically falls back to Docker if the `psql` command is not available:
+To execute the SQL script directly, run one of the helper commands inside
+`Back-End/scripts`. The shell script falls back to Docker if the `psql` command
+is not available:
 
 ```bash
 cd Back-End
 export PGPASSWORD=postgres
 ./scripts/run_initdb.sh
+```
+
+Alternatively, a Node-based helper is provided and can be executed with `npm`:
+
+```bash
+cd Back-End
+npm run db:init
 ```
 
 When using `docker compose`, the script will execute `psql` inside the `db` service.
