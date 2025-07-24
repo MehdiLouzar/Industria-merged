@@ -34,6 +34,12 @@ export PGPASSWORD=postgres
 ./scripts/run_initdb.sh
 ```
 
+Alternatively you can run the same SQL using the Node helper:
+
+```bash
+npm run db:init
+```
+
 After running the script you can sign in with the following demo accounts:
 
 ```
