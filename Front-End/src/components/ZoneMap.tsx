@@ -104,9 +104,7 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
         zoom={15}
         style={{ height: 350, width: "100%" }}
       >
-        <TileLayer
-          url={`https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?language=fr&worldview=MA&access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`}
-        />
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <Polygon
           positions={zonePolygon}
           pathOptions={{ color: zoneColor[zone.status] || "blue" }}

@@ -56,9 +56,7 @@ export default function MapView() {
 
   return (
     <MapContainer center={[31.7, -6.5]} zoom={6} style={{ height: 600, width: '100%' }}>
-      <TileLayer
-        url={`https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?language=fr&worldview=MA&access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`}
-      />
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <MarkerClusterGroup
         showCoverageOnHover={false}
         chunkedLoading
