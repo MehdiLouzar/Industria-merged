@@ -39,6 +39,9 @@ A `docker-compose.yml` file is provided at the repository root. After installing
 docker compose up --build
 ```
 
+The frontend map uses Mapbox tiles. Set `NEXT_PUBLIC_MAPBOX_TOKEN` in your `.env`
+file (or environment) so the tiles load correctly.
+
 This starts PostgreSQL, the API backend on port 3001 and the front-end on port 3000.
 The front-end is built with `NEXT_PUBLIC_API_URL=http://localhost:3001` so your
 browser can reach the API directly on the host. When using Docker, the frontend
