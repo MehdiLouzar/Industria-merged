@@ -51,8 +51,7 @@ export default function MapView() {
   return (
     <MapContainer center={[31.7, -6.5]} zoom={6} style={{ height: 600, width: '100%' }}>
       <TileLayer
-        url={`https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?language=fr&worldview=MA&access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`}
-        id="mapbox/streets-v11"
+        url={`https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?language=fr&worldview=MA&access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`}
       />
       <MarkerClusterGroup>
         {zones.map(z => (
@@ -61,19 +60,19 @@ export default function MapView() {
             position={[z.geometry.coordinates[1], z.geometry.coordinates[0]]}
           >
             <Popup>
-              <div className="space-y-1 text-sm">
+              <div className="space-y-1 text-sm p-1">
                 <strong className="block mb-1">{z.properties.name}</strong>
                 <div>Statut: {z.properties.status}</div>
                 <div>Parcelles disponibles: {z.properties.availableParcels}</div>
                 {z.properties.activityIcons.length > 0 && (
-                  <div className="flex gap-1 text-lg">
+                  <div className="flex gap-1 text-xl">
                     {z.properties.activityIcons.map((ic, i) => (
                       <span key={i}>{ic}</span>
                     ))}
                   </div>
                 )}
                 {z.properties.amenityIcons.length > 0 && (
-                  <div className="flex gap-1 text-lg">
+                  <div className="flex gap-1 text-xl">
                     {z.properties.amenityIcons.map((ic, i) => (
                       <span key={i}>{ic}</span>
                     ))}
