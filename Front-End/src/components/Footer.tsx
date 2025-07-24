@@ -1,11 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Phone, Calendar, Mail, Facebook, Youtube, Instagram, Twitter, Building2 } from 'lucide-react';
+import AppointmentForm from './AppointmentForm';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [showForm, setShowForm] = useState(false);
 
   const productLinks = [
     { title: 'Zones Industrielles', href: '/zones' },
@@ -56,6 +59,7 @@ export default function Footer() {
   ];
 
   return (
+    <>
     <footer className="bg-gray-800 text-white">
       {/* Action buttons */}
       <div className="bg-gray-700 py-6">
@@ -69,7 +73,10 @@ export default function Footer() {
               <Mail className="w-5 h-5" />
               Être contacté
             </Button>
-            <Button className="header-red text-white hover:opacity-90 flex items-center gap-2">
+            <Button
+              className="header-red text-white hover:opacity-90 flex items-center gap-2"
+              onClick={() => setShowForm(true)}
+            >
               <Calendar className="w-5 h-5" />
               Prise de rendez-vous
             </Button>
@@ -193,7 +200,10 @@ export default function Footer() {
                 <Phone className="w-4 h-4 text-red-400" />
                 <span className="text-xl font-bold">+212 5 37 57 20 00</span>
               </div>
-              <Button className="w-full header-red text-white hover:opacity-90 mt-3">
+              <Button
+                className="w-full header-red text-white hover:opacity-90 mt-3"
+                onClick={() => setShowForm(true)}
+              >
                 Prise de rendez-vous
               </Button>
             </div>
@@ -222,5 +232,7 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+    {showForm && <AppointmentForm onClose={() => setShowForm(false)} />}
+    </>
   );
 }

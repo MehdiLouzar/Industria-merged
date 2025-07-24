@@ -12,7 +12,12 @@ interface Parcel {
   reference: string
 }
 
-export default function AppointmentForm({ parcel, onClose }: { parcel: Parcel; onClose: () => void }) {
+interface Props {
+  parcel?: Parcel
+  onClose: () => void
+}
+
+export default function AppointmentForm({ parcel, onClose }: Props) {
   const [open, setOpen] = useState(true)
   const [contactName, setContactName] = useState('')
   const [contactEmail, setContactEmail] = useState('')
@@ -23,7 +28,7 @@ export default function AppointmentForm({ parcel, onClose }: { parcel: Parcel; o
     await fetch(`${getBaseUrl()}/api/appointments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contactName, contactEmail, message, parcelId: parcel.id })
+      body: JSON.stringify({ contactName, contactEmail, message, parcelId: parcel?.id })
     })
     setOpen(false)
     onClose()
@@ -33,7 +38,9 @@ export default function AppointmentForm({ parcel, onClose }: { parcel: Parcel; o
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) onClose() }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Prendre rendez-vous – {parcel.reference}</DialogTitle>
+          <DialogTitle>
+            Prendre rendez-vous{parcel ? ` – ${parcel.reference}` : ''}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           <div>
