@@ -18,10 +18,8 @@ interface Filters {
   regionId: string
   zoneTypeId: string
   status: string
-  minArea: string
-  maxArea: string
-  minPrice: string
-  maxPrice: string
+  area: string
+  price: string
 }
 export default function SearchBar({ onSearch }: { onSearch?: (f: Filters) => void }) {
   const router = useRouter()
@@ -29,15 +27,27 @@ export default function SearchBar({ onSearch }: { onSearch?: (f: Filters) => voi
     regionId: '',
     zoneTypeId: '',
     status: '',
-    minArea: '',
-    maxArea: '',
-    minPrice: '',
-    maxPrice: '',
+    area: '',
+    price: '',
   })
 
   const [regions, setRegions] = useState<{ id: string; name: string }[]>([])
   const [zoneTypes, setZoneTypes] = useState<{ id: string; name: string }[]>([])
   const statuses = ['AVAILABLE', 'RESERVED', 'OCCUPIED', 'SHOWROOM']
+  const priceRanges = [
+    { label: 'Tout prix', min: undefined, max: undefined },
+    { label: 'Moins de 500 DH/m²', min: undefined, max: 500 },
+    { label: '500 - 1000 DH/m²', min: 500, max: 1000 },
+    { label: '1000 - 3000 DH/m²', min: 1000, max: 3000 },
+    { label: 'Plus de 3000 DH/m²', min: 3000, max: undefined },
+  ]
+  const areaRanges = [
+    { label: 'Toute superficie', min: undefined, max: undefined },
+    { label: 'Moins de 10 000 m²', min: undefined, max: 10000 },
+    { label: '10 000 - 50 000 m²', min: 10000, max: 50000 },
+    { label: '50 000 - 100 000 m²', min: 50000, max: 100000 },
+    { label: 'Plus de 100 000 m²', min: 100000, max: undefined },
+  ]
 
   useEffect(() => {
     async function load() {
@@ -52,15 +62,24 @@ export default function SearchBar({ onSearch }: { onSearch?: (f: Filters) => voi
   }, [])
 
   const handleSearch = () => {
-    onSearch?.(filters)
     const params = new URLSearchParams()
     if (filters.regionId) params.set('regionId', filters.regionId)
     if (filters.zoneTypeId) params.set('zoneTypeId', filters.zoneTypeId)
     if (filters.status) params.set('status', filters.status)
-    if (filters.minArea) params.set('minArea', filters.minArea)
-    if (filters.maxArea) params.set('maxArea', filters.maxArea)
-    if (filters.minPrice) params.set('minPrice', filters.minPrice)
-    if (filters.maxPrice) params.set('maxPrice', filters.maxPrice)
+
+    if (filters.area) {
+      const r = areaRanges[parseInt(filters.area, 10)]
+      if (r?.min !== undefined) params.set('minArea', String(r.min))
+      if (r?.max !== undefined) params.set('maxArea', String(r.max))
+    }
+
+    if (filters.price) {
+      const r = priceRanges[parseInt(filters.price, 10)]
+      if (r?.min !== undefined) params.set('minPrice', String(r.min))
+      if (r?.max !== undefined) params.set('maxPrice', String(r.max))
+    }
+
+    onSearch?.(filters)
     router.push(`/?${params.toString()}`)
   }
 
@@ -113,21 +132,33 @@ export default function SearchBar({ onSearch }: { onSearch?: (f: Filters) => voi
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Prix min</label>
-          <Input type="number" value={filters.minPrice} onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })} />
-          <label className="text-sm font-medium text-gray-700">Prix max</label>
-          <Input type="number" value={filters.maxPrice} onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })} />
+          <label className="text-sm font-medium text-gray-700">Prix</label>
+          <Select value={filters.price} onValueChange={(v) => setFilters({ ...filters, price: v })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Tout" />
+            </SelectTrigger>
+            <SelectContent>
+              {priceRanges.map((r, i) => (
+                <SelectItem key={i.toString()} value={i.toString()}>{r.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Superficie min (m²)</label>
-          <Input type="number" value={filters.minArea} onChange={(e) => setFilters({ ...filters, minArea: e.target.value })} />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Superficie max (m²)</label>
-          <Input type="number" value={filters.maxArea} onChange={(e) => setFilters({ ...filters, maxArea: e.target.value })} />
+          <label className="text-sm font-medium text-gray-700">Superficie</label>
+          <Select value={filters.area} onValueChange={(v) => setFilters({ ...filters, area: v })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Toute" />
+            </SelectTrigger>
+            <SelectContent>
+              {areaRanges.map((r, i) => (
+                <SelectItem key={i.toString()} value={i.toString()}>{r.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

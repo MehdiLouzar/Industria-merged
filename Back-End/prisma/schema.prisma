@@ -112,6 +112,9 @@ enum ZoneStatus {
   RESERVED
   OCCUPIED
   SHOWROOM
+  PARTIALLY_OCCUPIED
+  FULLY_OCCUPIED
+  UNDER_DEVELOPMENT
 }
 
 // Modèle Parcel (Parcelle)
