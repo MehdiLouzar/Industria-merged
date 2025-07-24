@@ -1,6 +1,7 @@
 // Front-End/src/lib/auth.ts
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+import { fetchApi } from "./utils"
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -17,7 +18,7 @@ export const authOptions: NextAuthOptions = {
 
         try {
           // Appel à l'API backend pour l'authentification
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+          const data = await fetchApi<{ user?: any }>("/api/auth/login", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -26,12 +27,10 @@ export const authOptions: NextAuthOptions = {
             })
           })
 
-          const data = await res.json()
-
-          if (res.ok && data.user) {
+          if (data && data.user) {
             return data.user
           }
-          
+
           return null
         } catch (error) {
           console.error('Auth error:', error)

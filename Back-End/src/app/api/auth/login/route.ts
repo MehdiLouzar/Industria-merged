@@ -1,3 +1,4 @@
+import { applyCors, corsOptions } from "@/lib/cors";
 // Back-End/src/app/api/auth/login/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
@@ -8,9 +9,11 @@ export async function POST(request: NextRequest) {
     const { email, password } = await request.json();
 
     if (!email || !password) {
-      return NextResponse.json(
-        { message: 'Email et mot de passe requis' },
-        { status: 400 }
+      return applyCors(
+        NextResponse.json(
+          { message: 'Email et mot de passe requis' },
+          { status: 400 }
+        )
       );
     }
 
@@ -19,18 +22,22 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user || !user.isActive) {
-      return NextResponse.json(
-        { message: 'Identifiants invalides' },
-        { status: 401 }
+      return applyCors(
+        NextResponse.json(
+          { message: 'Identifiants invalides' },
+          { status: 401 }
+        )
       );
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
 
     if (!isValidPassword) {
-      return NextResponse.json(
-        { message: 'Identifiants invalides' },
-        { status: 401 }
+      return applyCors(
+        NextResponse.json(
+          { message: 'Identifiants invalides' },
+          { status: 401 }
+        )
       );
     }
 
@@ -45,21 +52,28 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        company: user.company,
-        role: user.role,
-      }
-    });
+    return applyCors(
+      NextResponse.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          company: user.company,
+          role: user.role,
+        }
+      })
+    );
 
   } catch (error) {
     console.error('Erreur de connexion:', error);
-    return NextResponse.json(
-      { message: 'Erreur interne du serveur' },
-      { status: 500 }
+    return applyCors(
+      NextResponse.json(
+        { message: 'Erreur interne du serveur' },
+        { status: 500 }
+      )
     );
   }
+}
+export function OPTIONS() {
+  return corsOptions();
 }

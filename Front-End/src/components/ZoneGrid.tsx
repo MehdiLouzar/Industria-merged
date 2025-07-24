@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Ruler, Factory, Phone, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { fetchApi } from '@/lib/utils';
 
 interface IndustrialZone {
   id: string;
@@ -22,9 +24,10 @@ interface IndustrialZone {
 }
 
 export default function ZoneGrid() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
-  const [zones, setZones] = useState<IndustrialZone[]>([]);
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 12
+  const [zones, setZones] = useState<IndustrialZone[]>([])
+  const searchParams = useSearchParams()
 
   interface ZoneResponse {
     id: string;
@@ -41,9 +44,10 @@ export default function ZoneGrid() {
     switch (status) {
       case 'RESERVED':
         return 'Réservé';
-      case 'UNDER_DEVELOPMENT':
-      case 'PARTIALLY_OCCUPIED':
-        return 'En cours';
+      case 'OCCUPIED':
+        return 'Occupé';
+      case 'SHOWROOM':
+        return 'Showroom';
       default:
         return 'Disponible';
     }
@@ -51,10 +55,12 @@ export default function ZoneGrid() {
 
   useEffect(() => {
     async function load() {
-      const base = process.env.NEXT_PUBLIC_API_URL || '';
-      const res = await fetch(`${base}/api/zones`);
-      if (!res.ok) return;
-      const data: ZoneResponse[] = await res.json();
+      const qs = new URLSearchParams()
+      searchParams.forEach((v, k) => {
+        qs.set(k, v)
+      })
+      const data = await fetchApi<ZoneResponse[]>(`/api/zones?${qs.toString()}`)
+      if (!data) return
       const mapped: IndustrialZone[] = data.map((z) => ({
         id: z.id,
         name: z.name,
@@ -67,10 +73,10 @@ export default function ZoneGrid() {
         image: 'https://source.unsplash.com/featured/?industrial',
         features: z.amenities?.map((a) => a.amenity.name) ?? [],
       }));
-      setZones(mapped);
+      setZones(mapped)
     }
-    load();
-  }, []);
+    load()
+  }, [searchParams])
 
   const totalPages = Math.ceil(zones.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -80,12 +86,12 @@ export default function ZoneGrid() {
     switch (status) {
       case 'Disponible':
         return 'bg-green-100 text-green-800';
-      case 'Nouveau':
+      case 'Showroom':
         return 'bg-blue-100 text-blue-800';
-      case 'En cours':
-        return 'bg-orange-100 text-orange-800';
+      case 'Occupé':
+        return 'bg-gray-100 text-gray-800';
       case 'Réservé':
-        return 'bg-red-100 text-red-800';
+        return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }

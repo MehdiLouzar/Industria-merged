@@ -1,3 +1,4 @@
+import { applyCors, corsOptions } from "@/lib/cors";
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
@@ -23,13 +24,19 @@ export async function GET() {
     })
   ]);
 
-  return Response.json({
-    totalUsers,
-    totalZones,
-    totalParcels,
-    totalAppointments,
-    pendingAppointments,
-    availableParcels,
-    recentActivities
-  });
+  return applyCors(
+    Response.json({
+      totalUsers,
+      totalZones,
+      totalParcels,
+      totalAppointments,
+      pendingAppointments,
+      availableParcels,
+      recentActivities
+    })
+  );
+}
+
+export function OPTIONS() {
+  return corsOptions();
 }

@@ -5,13 +5,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { fetchApi } from '@/lib/utils'
 
 interface Parcel {
   id: string
   reference: string
 }
 
-export default function AppointmentForm({ parcel, onClose }: { parcel: Parcel; onClose: () => void }) {
+interface Props {
+  parcel?: Parcel
+  onClose: () => void
+}
+
+export default function AppointmentForm({ parcel, onClose }: Props) {
   const [open, setOpen] = useState(true)
   const [contactName, setContactName] = useState('')
   const [contactEmail, setContactEmail] = useState('')
@@ -19,10 +25,10 @@ export default function AppointmentForm({ parcel, onClose }: { parcel: Parcel; o
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/appointments`, {
+    await fetchApi('/api/appointments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contactName, contactEmail, message, parcelId: parcel.id })
+      body: JSON.stringify({ contactName, contactEmail, message, parcelId: parcel?.id })
     })
     setOpen(false)
     onClose()
@@ -32,7 +38,9 @@ export default function AppointmentForm({ parcel, onClose }: { parcel: Parcel; o
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) onClose() }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Prendre rendez-vous – {parcel.reference}</DialogTitle>
+          <DialogTitle>
+            Prendre rendez-vous{parcel ? ` – ${parcel.reference}` : ''}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           <div>

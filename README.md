@@ -39,4 +39,40 @@ A `docker-compose.yml` file is provided at the repository root. After installing
 docker compose up --build
 ```
 
-This starts PostgreSQL, the API backend on port 3001 and the front-end on port 3000. An optional Nginx proxy listens on port 80.
+This starts PostgreSQL, the API backend on port 3001 and the front-end on port 3000.
+The front-end is built with `NEXT_PUBLIC_API_URL=http://localhost:3001` so your
+browser can reach the API directly on the host. When using Docker, the frontend
+server accesses the backend via `API_INTERNAL_URL=http://backend:3001`.
+An optional Nginx proxy listens on port 80.
+The backend adds CORS headers in each API route so the React app can call the API
+without extra configuration.
+
+### Manual database initialisation
+
+To execute the SQL script directly, run the helper inside `Back-End/scripts`.
+It automatically falls back to Docker if the `psql` command is not available:
+
+```bash
+cd Back-End
+export PGPASSWORD=postgres
+./scripts/run_initdb.sh
+```
+
+When using `docker compose`, the script will execute `psql` inside the `db` service.
+The SQL file now also creates demo users. Default logins are:
+
+```
+- admin@zonespro.ma / password123
+- manager@zonespro.ma / password123
+- demo@entreprise.ma / password123
+```
+Lambert polygon points are inserted into `zone_vertices` and `parcel_vertices`
+to allow drawing shapes for zones and parcels.
+
+You can also run the command manually:
+
+```bash
+PGPASSWORD=postgres docker compose exec db \
+  psql -U postgres -d industria \
+  -f /docker-entrypoint-initdb.d/initDB.sql
+```

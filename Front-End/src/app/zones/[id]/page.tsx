@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import ZoneMap from "@/components/ZoneMap";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import AppointmentForm from "@/components/AppointmentForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { fetchApi } from "@/lib/utils";
 
 interface Parcel {
   id: string;
@@ -13,6 +18,7 @@ interface Parcel {
   longitude: number | null;
   area?: number | null;
   price?: number | null;
+  vertices?: { seq: number; lambertX: number; lambertY: number }[];
 }
 
 interface Zone {
@@ -29,29 +35,32 @@ interface Zone {
   activities?: { activity: { name: string } }[];
   amenities?: { amenity: { name: string } }[];
   parcels: Parcel[];
+  vertices?: { seq: number; lambertX: number; lambertY: number }[];
 }
 
 export default function ZonePage() {
   const params = useParams();
   const { id } = params as { id: string };
   const [zone, setZone] = useState<Zone | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/zones/${id}`)
-      .then((r) => r.json())
-      .then(setZone)
+    fetchApi<Zone>(`/api/zones/${id}`)
+      .then((z) => z && setZone(z))
       .catch(console.error);
   }, [id]);
 
   if (!zone) return <p className="p-4">Chargement...</p>;
 
   return (
-    <div className="p-4 space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{zone.name}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm">
+    <>
+      <Header />
+      <div className="p-4 space-y-6 max-w-5xl mx-auto">
+        <Card className="shadow">
+          <CardHeader>
+            <CardTitle>{zone.name}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm leading-relaxed">
           {zone.description && <p>{zone.description}</p>}
           <p className="text-muted-foreground">Statut: {zone.status}</p>
           {zone.region?.name && <p>Région: {zone.region.name}</p>}
@@ -71,8 +80,21 @@ export default function ZonePage() {
             </p>
           )}
         </CardContent>
-      </Card>
-      <ZoneMap zone={zone} />
-    </div>
+        </Card>
+        <div className="text-right">
+          <Button onClick={() => setShowForm(true)}>Prendre rendez-vous</Button>
+        </div>
+        <div className="pt-4">
+          <ZoneMap zone={zone} />
+        </div>
+      </div>
+      <Footer />
+      {showForm && zone.parcels[0] && (
+        <AppointmentForm
+          parcel={{ id: zone.parcels[0].id, reference: zone.parcels[0].reference }}
+          onClose={() => setShowForm(false)}
+        />
+      )}
+    </>
   );
 }

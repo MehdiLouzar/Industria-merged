@@ -6,6 +6,7 @@ import { authOptions } from '@/lib/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { fetchApi } from '@/lib/utils';
 import {
   Users,
   MapPin,
@@ -21,16 +22,11 @@ import {
 import Link from 'next/link';
 
 async function getAdminStats() {
-  const base = process.env.NEXT_PUBLIC_API_URL || '';
-  const res = await fetch(`${base}/api/admin/stats`, { 
-    cache: 'no-store',
-    // Ajouter un timeout pour éviter les blocages
-    next: { revalidate: 0 }
-  });
-  if (!res.ok) {
+  const data = await fetchApi('/api/admin/stats');
+  if (!data) {
     throw new Error('Unable to load admin stats');
   }
-  return res.json();
+  return data;
 }
 
 export default async function AdminDashboard() {
