@@ -6,6 +6,12 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 import MarkerClusterGroup from 'react-leaflet-markercluster'
 import 'leaflet/dist/leaflet.css'
+import 'react-leaflet-markercluster/dist/styles.min.css'
+import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png'
+import iconUrl from 'leaflet/dist/images/marker-icon.png'
+import shadowUrl from 'leaflet/dist/images/marker-shadow.png'
+
+L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl })
 import { fetchApi } from '@/lib/utils'
 
 type ZoneFeature = {
@@ -53,7 +59,10 @@ export default function MapView() {
       <TileLayer
         url={`https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?language=fr&worldview=MA&access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`}
       />
-      <MarkerClusterGroup>
+      <MarkerClusterGroup
+        showCoverageOnHover={false}
+        chunkedLoading
+      >
         {zones.map(z => (
           <Marker
             key={z.properties.id}
