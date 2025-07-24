@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getBaseUrl, fetchApi } from '@/lib/utils'
+import { fetchApi } from '@/lib/utils'
 import Pagination from '@/components/Pagination'
 import {
   Select,
@@ -79,11 +79,11 @@ export default function UsersAdmin() {
       password: form.password,
     }
     if (form.id) {
-      await fetch(`${getBaseUrl()}/api/users/${form.id}`, {
+      await fetchApi(`/api/users/${form.id}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
       })
     } else {
-      await fetch(`${getBaseUrl()}/api/users`, {
+      await fetchApi('/api/users', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
       })
     }
@@ -115,7 +115,7 @@ export default function UsersAdmin() {
     setOpen(true)
   }
   async function del(id: string) {
-    await fetch(`${getBaseUrl()}/api/users/${id}`, { method: 'DELETE' })
+    await fetchApi(`/api/users/${id}`, { method: 'DELETE' })
     load()
   }
 

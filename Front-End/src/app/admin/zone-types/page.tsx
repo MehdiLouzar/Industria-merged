@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getBaseUrl, fetchApi } from '@/lib/utils'
+import { fetchApi } from '@/lib/utils'
 import Pagination from '@/components/Pagination'
 
 interface ZoneType {
@@ -45,13 +45,13 @@ export default function ZoneTypesAdmin() {
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     if (form.id) {
-      await fetch(`${getBaseUrl()}/api/zone-types/${form.id}`, {
+      await fetchApi(`/api/zone-types/${form.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name })
       })
     } else {
-      await fetch(`${getBaseUrl()}/api/zone-types`, {
+      await fetchApi('/api/zone-types', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name })
@@ -68,7 +68,7 @@ export default function ZoneTypesAdmin() {
   }
 
   async function del(id: string) {
-    await fetch(`${getBaseUrl()}/api/zone-types/${id}`, { method: 'DELETE' })
+    await fetchApi(`/api/zone-types/${id}`, { method: 'DELETE' })
     load()
   }
 

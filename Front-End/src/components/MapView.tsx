@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
-import { getBaseUrl } from '@/lib/utils'
+import { fetchApi } from '@/lib/utils'
 
 type ZoneFeature = {
   geometry: { type: string; coordinates: [number, number] }
@@ -27,12 +27,12 @@ export default function MapView() {
   const [parcels, setParcels] = useState<ParcelFeature[]>([])
 
   useEffect(() => {
-    const base = getBaseUrl()
-    fetch(`${base}/api/map/zones`)
-      .then(r => r.json())
-      .then(d => setZones(d.features))
+    fetchApi<{ features: ZoneFeature[] }>("/api/map/zones")
+      .then((d) => d && setZones(d.features))
       .catch(console.error)
-    fetch(`${base}/api/map/parcels`).then(r => r.json()).then(d => setParcels(d.features)).catch(console.error)
+    fetchApi<{ features: ParcelFeature[] }>("/api/map/parcels")
+      .then((d) => d && setParcels(d.features))
+      .catch(console.error)
   }, [])
 
 

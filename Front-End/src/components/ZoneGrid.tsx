@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Ruler, Factory, Phone, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getBaseUrl } from '@/lib/utils';
+import { fetchApi } from '@/lib/utils';
 
 interface IndustrialZone {
   id: string;
@@ -55,14 +55,12 @@ export default function ZoneGrid() {
 
   useEffect(() => {
     async function load() {
-      const base = getBaseUrl()
       const qs = new URLSearchParams()
       searchParams.forEach((v, k) => {
         qs.set(k, v)
       })
-      const res = await fetch(`${base}/api/zones?${qs.toString()}`)
-      if (!res.ok) return
-      const data: ZoneResponse[] = await res.json()
+      const data = await fetchApi<ZoneResponse[]>(`/api/zones?${qs.toString()}`)
+      if (!data) return
       const mapped: IndustrialZone[] = data.map((z) => ({
         id: z.id,
         name: z.name,

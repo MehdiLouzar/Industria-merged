@@ -14,7 +14,8 @@ export function getBaseUrl() {
 
 export async function fetchApi<T>(path: string, init?: RequestInit): Promise<T | null> {
   try {
-    const res = await fetch(`${getBaseUrl()}${path}`, init)
+    const url = new URL(path, getBaseUrl())
+    const res = await fetch(url.toString(), init)
     if (!res.ok) return null
     return await res.json()
   } catch (err) {

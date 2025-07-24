@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getBaseUrl, fetchApi } from '@/lib/utils'
+import { fetchApi } from '@/lib/utils'
 import Pagination from '@/components/Pagination'
 
 interface Amenity {
@@ -58,13 +58,13 @@ export default function AmenitiesAdmin() {
       category: form.category || undefined,
     }
     if (form.id) {
-      await fetch(`${getBaseUrl()}/api/amenities/${form.id}`, {
+      await fetchApi(`/api/amenities/${form.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
     } else {
-      await fetch(`${getBaseUrl()}/api/amenities`, {
+      await fetchApi('/api/amenities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -86,7 +86,7 @@ export default function AmenitiesAdmin() {
     setOpen(true)
   }
   async function del(id: string) {
-    await fetch(`${getBaseUrl()}/api/amenities/${id}`, { method: 'DELETE' })
+    await fetchApi(`/api/amenities/${id}`, { method: 'DELETE' })
     load()
   }
 

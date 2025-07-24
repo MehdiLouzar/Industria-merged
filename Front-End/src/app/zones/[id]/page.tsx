@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 import AppointmentForm from "@/components/AppointmentForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getBaseUrl } from "@/lib/utils";
+import { fetchApi } from "@/lib/utils";
 
 interface Parcel {
   id: string;
@@ -45,9 +45,8 @@ export default function ZonePage() {
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    fetch(`${getBaseUrl()}/api/zones/${id}`)
-      .then((r) => r.json())
-      .then(setZone)
+    fetchApi<Zone>(`/api/zones/${id}`)
+      .then((z) => z && setZone(z))
       .catch(console.error);
   }, [id]);
 

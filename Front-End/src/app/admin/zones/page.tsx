@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getBaseUrl, fetchApi } from '@/lib/utils'
+import { fetchApi } from '@/lib/utils'
 import Pagination from '@/components/Pagination'
 import {
   Select,
@@ -229,13 +229,13 @@ export default function ZonesAdmin() {
       })),
     }
     if (form.id) {
-      await fetch(`${getBaseUrl()}/api/zones/${form.id}`, {
+      await fetchApi(`/api/zones/${form.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
     } else {
-      await fetch(`${getBaseUrl()}/api/zones`, {
+      await fetchApi('/api/zones', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -291,7 +291,7 @@ export default function ZonesAdmin() {
   }
 
   async function del(id: string) {
-    await fetch(`${getBaseUrl()}/api/zones/${id}`, { method: 'DELETE' })
+    await fetchApi(`/api/zones/${id}`, { method: 'DELETE' })
     load()
   }
 

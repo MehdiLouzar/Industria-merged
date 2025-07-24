@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getBaseUrl, fetchApi } from '@/lib/utils'
+import { fetchApi } from '@/lib/utils'
 import Pagination from '@/components/Pagination'
 import {
   Select,
@@ -190,13 +190,13 @@ export default function ParcelsAdmin() {
     }
 
     if (form.id) {
-      await fetch(`${getBaseUrl()}/api/parcels/${form.id}`, {
+      await fetchApi(`/api/parcels/${form.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
     } else {
-      await fetch(`${getBaseUrl()}/api/parcels`, {
+      await fetchApi('/api/parcels', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -250,7 +250,7 @@ export default function ParcelsAdmin() {
     setOpen(true)
   }
   async function del(id: string) {
-    await fetch(`${getBaseUrl()}/api/parcels/${id}`, { method: 'DELETE' })
+    await fetchApi(`/api/parcels/${id}`, { method: 'DELETE' })
     load()
   }
 

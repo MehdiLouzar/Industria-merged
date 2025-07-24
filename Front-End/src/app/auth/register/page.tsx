@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { getBaseUrl } from '@/lib/utils';
+import { fetchApi } from '@/lib/utils';
 import { Building2, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
@@ -52,8 +52,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const base = getBaseUrl();
-      const response = await fetch(`${base}/api/auth/register`, {
+      const response = await fetchApi('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,11 +66,10 @@ export default function RegisterPage() {
         }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Erreur lors de l\'inscription');
+      if (!response) {
+        throw new Error('Erreur lors de l\'inscription');
       }
+      const data = response;
 
       setSuccess(true);
 

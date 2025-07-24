@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getBaseUrl, fetchApi } from '@/lib/utils'
+import { fetchApi } from '@/lib/utils'
 import Pagination from '@/components/Pagination'
 
 interface Country {
@@ -48,13 +48,13 @@ export default function CountriesAdmin() {
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     if (form.id) {
-      await fetch(`${getBaseUrl()}/api/countries/${form.id}`, {
+      await fetchApi(`/api/countries/${form.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name, code: form.code })
       })
     } else {
-      await fetch(`${getBaseUrl()}/api/countries`, {
+      await fetchApi('/api/countries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name, code: form.code })
@@ -71,7 +71,7 @@ export default function CountriesAdmin() {
   }
 
   async function del(id: string) {
-    await fetch(`${getBaseUrl()}/api/countries/${id}`, { method: 'DELETE' })
+    await fetchApi(`/api/countries/${id}`, { method: 'DELETE' })
     load()
   }
 
