@@ -37,9 +37,9 @@ export default function MapView() {
 
 
   return (
-    <MapContainer center={[31.5, -7.5]} zoom={6} style={{ height: 600, width: '100%' }}>
+    <MapContainer center={[31.7, -6.5]} zoom={6} style={{ height: 600, width: '100%' }}>
       <TileLayer
-        url={`https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`}
+        url={`https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?language=fr&worldview=MA&access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`}
         id="mapbox/streets-v11"
       />
       {zones.map(z => (
