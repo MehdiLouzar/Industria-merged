@@ -11,8 +11,8 @@ interface Parcel {
   reference: string;
   status: string;
   isFree?: boolean;
-  latitude: number | null;
-  longitude: number | null;
+  lambertX?: number | null;
+  lambertY?: number | null;
   area?: number | null;
   price?: number | null;
   vertices?: { seq: number; lambertX: number; lambertY: number }[];
@@ -22,8 +22,8 @@ interface Zone {
   id: string;
   name: string;
   status: string;
-  latitude: number | null;
-  longitude: number | null;
+  lambertX?: number | null;
+  lambertY?: number | null;
   parcels: Parcel[];
   vertices?: { seq: number; lambertX: number; lambertY: number }[];
 }
@@ -38,18 +38,25 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
     return [lat, lon];
   };
 
-  if (zone.latitude == null || zone.longitude == null) return null;
+  const center = zone.vertices && zone.vertices.length
+    ? toLatLng(zone.vertices[0].lambertX, zone.vertices[0].lambertY)
+    : zone.lambertX && zone.lambertY
+      ? toLatLng(zone.lambertX, zone.lambertY)
+      : [31.7, -6.5];
 
   const zonePolygon: [number, number][] = zone.vertices && zone.vertices.length
     ? zone.vertices
         .sort((a, b) => a.seq - b.seq)
         .map((v) => toLatLng(v.lambertX, v.lambertY))
-    : [
-        [zone.latitude + 0.01, zone.longitude - 0.01],
-        [zone.latitude + 0.01, zone.longitude + 0.01],
-        [zone.latitude - 0.01, zone.longitude + 0.01],
-        [zone.latitude - 0.01, zone.longitude - 0.01],
-      ];
+    : (() => {
+        const [lat, lon] = center;
+        return [
+          [lat + 0.01, lon - 0.01],
+          [lat + 0.01, lon + 0.01],
+          [lat - 0.01, lon + 0.01],
+          [lat - 0.01, lon - 0.01],
+        ];
+      })();
 
   const parcelPoly = (p: Parcel): [number, number][] =>
     p.vertices && p.vertices.length
@@ -57,12 +64,14 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
           .sort((a, b) => a.seq - b.seq)
           .map((v) => toLatLng(v.lambertX, v.lambertY))
       : (() => {
-          const size = 0.002;
+          const size = 100; // meters in Lambert units
+          const baseX = p.lambertX ?? zone.lambertX ?? 0;
+          const baseY = p.lambertY ?? zone.lambertY ?? 0;
           return [
-            [p.latitude! + size, p.longitude! - size],
-            [p.latitude! + size, p.longitude! + size],
-            [p.latitude! - size, p.longitude! + size],
-            [p.latitude! - size, p.longitude! - size],
+            toLatLng(baseX - size, baseY - size),
+            toLatLng(baseX - size, baseY + size),
+            toLatLng(baseX + size, baseY + size),
+            toLatLng(baseX + size, baseY - size),
           ];
         })();
 
@@ -91,7 +100,7 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
   return (
     <>
       <MapContainer
-        center={[zone.latitude, zone.longitude]}
+        center={center}
         zoom={15}
         style={{ height: 350, width: "100%" }}
       >
@@ -112,8 +121,7 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
         </Polygon>
         {zone.parcels.map(
           (p) =>
-            p.latitude &&
-            p.longitude && (
+            (p.lambertX != null && p.lambertY != null) && (
               <Polygon
                 key={p.id}
                 positions={parcelPoly(p)}
