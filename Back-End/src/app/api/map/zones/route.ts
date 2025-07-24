@@ -18,10 +18,17 @@ export async function GET() {
   });
 
   const features = zones.map(z => {
-    const point = z.vertices.length
-      ? [z.vertices[0].lambertX, z.vertices[0].lambertY]
-      : [z.lambertX!, z.lambertY!];
-    if (!point[0] || !point[1]) return null;
+    let point: [number, number] | null = null;
+    if (z.vertices.length) {
+      const sum = z.vertices.reduce(
+        (acc, v) => [acc[0] + v.lambertX, acc[1] + v.lambertY],
+        [0, 0]
+      );
+      point = [sum[0] / z.vertices.length, sum[1] / z.vertices.length];
+    } else if (z.lambertX != null && z.lambertY != null) {
+      point = [z.lambertX, z.lambertY];
+    }
+    if (!point) return null;
     const [lat, lon] = lambertToWGS84(point[0], point[1]);
     return {
       type: "Feature",
