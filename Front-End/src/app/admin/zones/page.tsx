@@ -32,8 +32,6 @@ interface Zone {
   totalArea?: number | null
   price?: number | null
   status: string
-  latitude?: number | null
-  longitude?: number | null
   lambertX?: number | null
   lambertY?: number | null
   zoneTypeId?: string | null
@@ -51,8 +49,6 @@ interface ZoneForm {
   totalArea: string
   price: string
   status: string
-  latitude: string
-  longitude: string
   lambertX: string
   lambertY: string
   zoneTypeId: string
@@ -88,8 +84,7 @@ export default function ZonesAdmin() {
     totalArea: '',
     price: '',
     status: 'AVAILABLE',
-    latitude: '',
-    longitude: '',
+
     lambertX: '',
     lambertY: '',
     zoneTypeId: '',
@@ -214,8 +209,6 @@ export default function ZonesAdmin() {
       totalArea: form.totalArea ? parseFloat(form.totalArea) : undefined,
       price: form.price ? parseFloat(form.price) : undefined,
       status: form.status,
-      latitude: form.latitude ? parseFloat(form.latitude) : undefined,
-      longitude: form.longitude ? parseFloat(form.longitude) : undefined,
       lambertX: form.lambertX ? parseFloat(form.lambertX) : undefined,
       lambertY: form.lambertY ? parseFloat(form.lambertY) : undefined,
       zoneTypeId: form.zoneTypeId || undefined,
@@ -249,8 +242,6 @@ export default function ZonesAdmin() {
       totalArea: '',
       price: '',
       status: 'AVAILABLE',
-      latitude: '',
-      longitude: '',
       lambertX: '',
       lambertY: '',
       zoneTypeId: '',
@@ -273,8 +264,6 @@ export default function ZonesAdmin() {
       totalArea: z.totalArea?.toString() ?? '',
       price: z.price?.toString() ?? '',
       status: z.status,
-      latitude: z.latitude?.toString() ?? '',
-      longitude: z.longitude?.toString() ?? '',
       lambertX: z.lambertX?.toString() ?? '',
       lambertY: z.lambertY?.toString() ?? '',
       zoneTypeId: z.zoneTypeId || '',
@@ -304,8 +293,6 @@ export default function ZonesAdmin() {
       totalArea: '',
       price: '',
       status: 'AVAILABLE',
-      latitude: '',
-      longitude: '',
       lambertX: '',
       lambertY: '',
       zoneTypeId: '',
@@ -389,16 +376,6 @@ export default function ZonesAdmin() {
               <div>
                 <Label htmlFor="price">Prix DH/m²</Label>
                 <Input id="price" name="price" value={form.price} onChange={handleChange} />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="latitude">Latitude</Label>
-                <Input id="latitude" name="latitude" value={form.latitude} onChange={handleChange} />
-              </div>
-              <div>
-                <Label htmlFor="longitude">Longitude</Label>
-                <Input id="longitude" name="longitude" value={form.longitude} onChange={handleChange} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">

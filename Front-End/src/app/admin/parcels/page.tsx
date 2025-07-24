@@ -34,8 +34,6 @@ interface Parcel {
   isShowroom?: boolean | null
   cos?: number | null
   cus?: number | null
-  latitude?: number | null
-  longitude?: number | null
   lambertX?: number | null
   lambertY?: number | null
   zoneId: string
@@ -52,8 +50,6 @@ interface ParcelForm {
   isShowroom: boolean
   cos: string
   cus: string
-  latitude: string
-  longitude: string
   lambertX: string
   lambertY: string
   zoneId: string
@@ -80,8 +76,7 @@ export default function ParcelsAdmin() {
     isShowroom: false,
     cos: '',
     cus: '',
-    latitude: '',
-    longitude: '',
+
     lambertX: '',
     lambertY: '',
     zoneId: '',
@@ -177,8 +172,6 @@ export default function ParcelsAdmin() {
       isShowroom: form.isShowroom,
       cos: form.cos ? parseFloat(form.cos) : undefined,
       cus: form.cus ? parseFloat(form.cus) : undefined,
-      latitude: form.latitude ? parseFloat(form.latitude) : undefined,
-      longitude: form.longitude ? parseFloat(form.longitude) : undefined,
       lambertX: form.lambertX ? parseFloat(form.lambertX) : undefined,
       lambertY: form.lambertY ? parseFloat(form.lambertY) : undefined,
       zoneId: form.zoneId,
@@ -213,8 +206,6 @@ export default function ParcelsAdmin() {
       isShowroom: false,
       cos: '',
       cus: '',
-      latitude: '',
-      longitude: '',
       lambertX: '',
       lambertY: '',
       zoneId: '',
@@ -236,8 +227,6 @@ export default function ParcelsAdmin() {
       isShowroom: it.isShowroom ?? false,
       cos: it.cos?.toString() ?? '',
       cus: it.cus?.toString() ?? '',
-      latitude: it.latitude?.toString() ?? '',
-      longitude: it.longitude?.toString() ?? '',
       lambertX: it.lambertX?.toString() ?? '',
       lambertY: it.lambertY?.toString() ?? '',
       zoneId: it.zoneId,
@@ -265,8 +254,6 @@ export default function ParcelsAdmin() {
       isShowroom: false,
       cos: '',
       cus: '',
-      latitude: '',
-      longitude: '',
       lambertX: '',
       lambertY: '',
       zoneId: '',
@@ -339,16 +326,6 @@ export default function ParcelsAdmin() {
               <div>
                 <Label htmlFor="price">Prix</Label>
                 <Input id="price" name="price" value={form.price} onChange={handleChange} />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="latitude">Latitude</Label>
-                <Input id="latitude" name="latitude" value={form.latitude} onChange={handleChange} />
-              </div>
-              <div>
-                <Label htmlFor="longitude">Longitude</Label>
-                <Input id="longitude" name="longitude" value={form.longitude} onChange={handleChange} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">

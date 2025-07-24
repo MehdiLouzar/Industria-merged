@@ -218,8 +218,6 @@ async function main() {
         totalArea: 150000, // 15 hectares
         price: 2500,
         status: ZoneStatus.AVAILABLE,
-        latitude: 33.6169,
-        longitude: -7.6149,
         lambertX: 423456.78,
         lambertY: 372890.12,
         zoneTypeId: zoneTypes[0].id,
@@ -234,8 +232,6 @@ async function main() {
         totalArea: 200000, // 20 hectares
         price: 1800,
         status: ZoneStatus.OCCUPIED,
-        latitude: 33.6864,
-        longitude: -7.3737,
         lambertX: 445123.45,
         lambertY: 380567.89,
         zoneTypeId: zoneTypes[1].id,
@@ -250,8 +246,6 @@ async function main() {
         totalArea: 500000, // 50 hectares
         price: 3200,
         status: ZoneStatus.AVAILABLE,
-        latitude: 35.7595,
-        longitude: -5.8340,
         lambertX: 512345.67,
         lambertY: 412789.34,
         zoneTypeId: zoneTypes[0].id,
@@ -266,8 +260,6 @@ async function main() {
         totalArea: 80000, // 8 hectares
         price: 4000,
         status: ZoneStatus.RESERVED,
-        latitude: 34.0209,
-        longitude: -6.8416,
         lambertX: 467890.23,
         lambertY: 392456.78,
         zoneTypeId: zoneTypes[0].id,
@@ -293,8 +285,8 @@ async function main() {
         isShowroom: false,
         cos: null,
         cus: null,
-        latitude: zones[0].latitude! + (Math.random() - 0.5) * 0.01,
-        longitude: zones[0].longitude! + (Math.random() - 0.5) * 0.01,
+        lambertX: zones[0].lambertX! + (Math.random() - 0.5) * 100,
+        lambertY: zones[0].lambertY! + (Math.random() - 0.5) * 100,
         zoneId: zones[0].id,
       }
     })
@@ -313,8 +305,8 @@ async function main() {
         isShowroom: false,
         cos: null,
         cus: null,
-        latitude: zones[1].latitude! + (Math.random() - 0.5) * 0.01,
-        longitude: zones[1].longitude! + (Math.random() - 0.5) * 0.01,
+        lambertX: zones[1].lambertX! + (Math.random() - 0.5) * 100,
+        lambertY: zones[1].lambertY! + (Math.random() - 0.5) * 100,
         zoneId: zones[1].id,
       }
     })

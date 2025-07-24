@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import L from 'leaflet'
+import MarkerClusterGroup from 'react-leaflet-markercluster'
 import 'leaflet/dist/leaflet.css'
 import { fetchApi } from '@/lib/utils'
 
@@ -14,17 +16,27 @@ type ZoneFeature = {
     status: string
     availableParcels: number
     activityIcons: string[]
+    amenityIcons: string[]
   }
 }
 
 type ParcelFeature = {
   geometry: { type: string; coordinates: [number, number] }
-  properties: { id: string; reference: string }
+  properties: { id: string; reference: string; isShowroom: boolean; status: string }
 }
 
 export default function MapView() {
   const [zones, setZones] = useState<ZoneFeature[]>([])
   const [parcels, setParcels] = useState<ParcelFeature[]>([])
+
+  const parcelIcon = L.divIcon({
+    html: '<div style="background:#3388ff;border-radius:50%;width:12px;height:12px;border:2px solid white"></div>',
+    className: ''
+  })
+  const showroomIcon = L.divIcon({
+    html: '<div style="background:#e53e3e;border-radius:50%;width:12px;height:12px;border:2px solid white"></div>',
+    className: ''
+  })
 
   useEffect(() => {
     fetchApi<{ features: ZoneFeature[] }>("/api/map/zones")
@@ -42,38 +54,57 @@ export default function MapView() {
         url={`https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?language=fr&worldview=MA&access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`}
         id="mapbox/streets-v11"
       />
-      {zones.map(z => (
-        <Marker
-          key={z.properties.id}
-          position={[z.geometry.coordinates[1], z.geometry.coordinates[0]]}
-        >
-          <Popup>
-            <div className="space-y-1 text-sm">
-              <strong className="block mb-1">{z.properties.name}</strong>
-              <div>Statut: {z.properties.status}</div>
-              <div>Parcelles disponibles: {z.properties.availableParcels}</div>
-              {z.properties.activityIcons.length > 0 && (
-                <div className="flex gap-1 text-lg">
-                  {z.properties.activityIcons.map((ic, i) => (
-                    <span key={i}>{ic}</span>
-                  ))}
-                </div>
-              )}
-              <Link
-                href={`/zones/${z.properties.id}`}
-                className="text-blue-600 underline block mt-1"
-              >
-                Voir la zone
-              </Link>
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-      {parcels.map(p => (
-        <Marker key={p.properties.id} position={[p.geometry.coordinates[1], p.geometry.coordinates[0]]}>
-          <Popup>Parcelle {p.properties.reference}</Popup>
-        </Marker>
-      ))}
+      <MarkerClusterGroup>
+        {zones.map(z => (
+          <Marker
+            key={z.properties.id}
+            position={[z.geometry.coordinates[1], z.geometry.coordinates[0]]}
+          >
+            <Popup>
+              <div className="space-y-1 text-sm">
+                <strong className="block mb-1">{z.properties.name}</strong>
+                <div>Statut: {z.properties.status}</div>
+                <div>Parcelles disponibles: {z.properties.availableParcels}</div>
+                {z.properties.activityIcons.length > 0 && (
+                  <div className="flex gap-1 text-lg">
+                    {z.properties.activityIcons.map((ic, i) => (
+                      <span key={i}>{ic}</span>
+                    ))}
+                  </div>
+                )}
+                {z.properties.amenityIcons.length > 0 && (
+                  <div className="flex gap-1 text-lg">
+                    {z.properties.amenityIcons.map((ic, i) => (
+                      <span key={i}>{ic}</span>
+                    ))}
+                  </div>
+                )}
+                <Link
+                  href={`/zones/${z.properties.id}`}
+                  className="text-blue-600 underline block mt-1"
+                >
+                  Voir la zone
+                </Link>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+        {parcels.map(p => (
+          <Marker
+            key={p.properties.id}
+            position={[p.geometry.coordinates[1], p.geometry.coordinates[0]]}
+            icon={p.properties.isShowroom ? showroomIcon : parcelIcon}
+          >
+            <Popup>
+              <div className="space-y-1 text-sm">
+                <strong>{p.properties.reference}</strong>
+                <div>Statut: {p.properties.status}</div>
+                {p.properties.isShowroom && <div>Showroom</div>}
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MarkerClusterGroup>
     </MapContainer>
   )
 }

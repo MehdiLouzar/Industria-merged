@@ -83,11 +83,7 @@ model Zone {
   price       Float? // prix par m²
   status      ZoneStatus @default(AVAILABLE)
 
-  // Coordonnées géographiques (centroid)
-  latitude    Float?
-  longitude   Float?
-
-  // Coordonnées Lambert (optionnel pour future migration PostGIS)
+  // Coordonnées Lambert du centre (premier point)
   lambertX    Float?
   lambertY    Float?
 
@@ -129,11 +125,7 @@ model Parcel {
   cos         Float?
   cus         Float?
 
-  // Coordonnées géographiques
-  latitude    Float?
-  longitude   Float?
-
-  // Coordonnées Lambert
+  // Coordonnées Lambert du point principal
   lambertX    Float?
   lambertY    Float?
 

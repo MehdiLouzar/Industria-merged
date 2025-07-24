@@ -87,7 +87,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Demo zone
 INSERT INTO zones (
   id, name, description, address, "totalArea", price, status,
-  latitude, longitude, "lambertX", "lambertY",
+  "lambertX", "lambertY",
   "zoneTypeId", "regionId", "createdAt", "updatedAt"
 ) VALUES (
   'zone-demo',
@@ -97,8 +97,6 @@ INSERT INTO zones (
   150000,
   2500,
   'AVAILABLE',
-  33.6169,
-  -7.6149,
   423456.78,
   372890.12,
   'zt-private',
@@ -110,11 +108,11 @@ INSERT INTO zones (
 INSERT INTO parcels (
   id, reference, area, price, status,
   "isFree", "isShowroom", cos, cus,
-  latitude, longitude, "lambertX", "lambertY",
+  "lambertX", "lambertY",
   "zoneId", "createdAt", "updatedAt"
 ) VALUES
-  ('parcel-1', 'CAS-001', 10000, 2500, 'AVAILABLE', true, false, NULL, NULL, 33.617, -7.615, 423457, 372891, 'zone-demo', NOW(), NOW()),
-  ('parcel-2', 'CAS-002', 12000, 2500, 'RESERVED', true, false, NULL, NULL, 33.618, -7.616, 423458, 372892, 'zone-demo', NOW(), NOW())
+  ('parcel-1', 'CAS-001', 10000, 2500, 'AVAILABLE', true, false, NULL, NULL, 423457, 372891, 'zone-demo', NOW(), NOW()),
+  ('parcel-2', 'CAS-002', 12000, 2500, 'RESERVED', true, false, NULL, NULL, 423458, 372892, 'zone-demo', NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- Lambert polygon vertices for the demo zone
@@ -151,12 +149,11 @@ ON CONFLICT (id) DO NOTHING;
 -- Zone PIAJ
 INSERT INTO zones (
   id, name, description, "totalArea", price, status,
-  latitude, longitude, "lambertX", "lambertY",
+  "lambertX", "lambertY",
   "zoneTypeId", "regionId", "createdAt", "updatedAt"
 ) VALUES (
   'zone-piaj', 'PIAJ', 'Zone générée automatiquement pour les tests',
   1201325.73, 0, 'AVAILABLE',
-  33.907861, -6.375832,
   409631.94, 368109.73,
   'zt-private', 'region-rab', NOW(), NOW()
 ) ON CONFLICT (id) DO NOTHING;
@@ -196,12 +193,11 @@ ON CONFLICT DO NOTHING;
 -- Zone ZAINA
 INSERT INTO zones (
   id, name, description, "totalArea", price, status,
-  latitude, longitude, "lambertX", "lambertY",
+  "lambertX", "lambertY",
   "zoneTypeId", "regionId", "createdAt", "updatedAt"
 ) VALUES (
   'zone-zaina', 'ZAINA', 'Zone générée automatiquement pour les tests',
   159338.90, 0, 'AVAILABLE',
-  33.851166, -6.951490,
   356319.60, 362468.27,
   'zt-private', 'region-rab', NOW(), NOW()
 ) ON CONFLICT (id) DO NOTHING;
@@ -233,12 +229,11 @@ ON CONFLICT DO NOTHING;
 -- Zone OTTAWA
 INSERT INTO zones (
   id, name, description, "totalArea", price, status,
-  latitude, longitude, "lambertX", "lambertY",
+  "lambertX", "lambertY",
   "zoneTypeId", "regionId", "createdAt", "updatedAt"
 ) VALUES (
   'zone-ottawa', 'OTTAWA', 'Zone générée automatiquement pour les tests',
   181100.01, 0, 'AVAILABLE',
-  33.857374, -6.997026,
   352117.78, 363220.00,
   'zt-private', 'region-rab', NOW(), NOW()
 ) ON CONFLICT (id) DO NOTHING;
