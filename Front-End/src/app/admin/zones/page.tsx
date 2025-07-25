@@ -34,6 +34,8 @@ interface Zone {
   status: string
   lambertX?: number | null
   lambertY?: number | null
+  latitude?: number | null
+  longitude?: number | null
   zoneTypeId?: string | null
   regionId?: string | null
   activities?: { activityId: string }[]

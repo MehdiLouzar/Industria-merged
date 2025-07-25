@@ -81,10 +81,11 @@ The SQL file now also creates demo users. Default logins are:
 Lambert polygon points are inserted into `zone_vertices` and `parcel_vertices`
 to allow drawing shapes for zones and parcels.
 
-Zones and parcels only store Lambert North Morocco coordinates (EPSG:26191).
-Most API routes therefore return raw `lambertX` and `lambertY` values. The map
-endpoints convert these coordinates to WGS84 before sending them to the browser
-so Leaflet displays the correct locations.
+Zones and parcels keep their Lambert North Morocco coordinates (EPSG:26191) in
+the database. Trigger functions compute `latitude` and `longitude` columns from
+these Lambert values so the API can return GPS coordinates directly. Map
+endpoints still convert vertices on the fly, but the centroid of each zone or
+parcel uses the stored WGS84 fields when available.
 
 You can also run the command manually:
 

@@ -47,5 +47,7 @@ After running the script you can sign in with the following demo accounts:
 - demo@entreprise.ma / password123
 ```
 The SQL file also fills `zone_vertices` and `parcel_vertices` with Lambert
-coordinates so polygons can be drawn for each zone and parcel.
+coordinates so polygons can be drawn for each zone and parcel. Additional
+trigger functions keep `latitude` and `longitude` fields updated whenever
+`lambertX` or `lambertY` change.
 

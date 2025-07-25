@@ -87,6 +87,11 @@ model Zone {
   lambertX    Float?
   lambertY    Float?
 
+  // Coordonnées GPS calculées automatiquement depuis Lambert
+  latitude    Float?
+  longitude   Float?
+
+
   // Relations
   zoneTypeId String?
   regionId    String
@@ -128,6 +133,9 @@ model Parcel {
   // Coordonnées Lambert du point principal
   lambertX    Float?
   lambertY    Float?
+  // Coordonnées GPS calculées automatiquement depuis Lambert
+  latitude    Float?
+  longitude   Float?
 
   // Relations
   zoneId      String

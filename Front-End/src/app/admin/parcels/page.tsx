@@ -36,6 +36,8 @@ interface Parcel {
   cus?: number | null
   lambertX?: number | null
   lambertY?: number | null
+  latitude?: number | null
+  longitude?: number | null
   zoneId: string
   vertices?: Vertex[]
 }
