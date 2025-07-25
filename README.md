@@ -57,9 +57,11 @@ is not available:
 
 ```bash
 cd Back-End
-export PGPASSWORD=postgres
 ./scripts/run_initdb.sh
 ```
+
+The script defaults to the `postgres` password if the `PGPASSWORD`
+environment variable is not set.
 
 Alternatively, a Node-based helper is provided and can be executed with `npm`:
 

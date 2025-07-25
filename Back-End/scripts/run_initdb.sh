@@ -12,12 +12,9 @@ SQL_FILE="${SQL_FILE:-$(dirname "$0")/../db/init/initDB.sql}"
 DOCKER_SERVICE=${DOCKER_SERVICE:-db}
 
 run_psql() {
-  if [ -z "${PGPASSWORD:-}" ]; then
-    echo "Please set the PGPASSWORD environment variable with your database password." >&2
-    exit 1
-  fi
+  local pwd="${PGPASSWORD:-postgres}"
   echo "Running ${SQL_FILE} on ${DB_HOST}:${DB_PORT}/${DB_NAME} ..."
-  psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f "$SQL_FILE"
+  PGPASSWORD="$pwd" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f "$SQL_FILE"
   echo "Database initialized."
 }
 
