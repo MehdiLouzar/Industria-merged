@@ -1,5 +1,6 @@
 import { applyCors, corsOptions } from "@/lib/cors";
 import { prisma } from "@/lib/prisma";
+import { addLatLonToParcel } from "@/lib/coords";
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   const item = await prisma.parcel.findUnique({
@@ -7,7 +8,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     include: { vertices: true },
   });
   if (!item) return applyCors(new Response('Not Found', { status: 404 }));
-  return applyCors(Response.json(item));
+  return applyCors(Response.json(addLatLonToParcel(item)));
 }
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
@@ -25,7 +26,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       where: { id: params.id },
       include: { vertices: true },
     });
-    return applyCors(Response.json(item));
+    return applyCors(Response.json(addLatLonToParcel(item!)));
   } catch {
     return applyCors(new Response('Invalid data', { status: 400 }));
   }

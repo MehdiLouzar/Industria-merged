@@ -1,6 +1,7 @@
 import { applyCors, corsOptions } from "@/lib/cors";
 import { prisma } from "@/lib/prisma";
 import { ZoneStatus } from "@prisma/client";
+import { addLatLonToZone } from "@/lib/coords";
 import crypto from "crypto";
 
 export async function GET(req: Request) {
@@ -39,7 +40,8 @@ export async function GET(req: Request) {
       vertices: true,
     },
   });
-  return applyCors(Response.json(zones));
+  const mapped = zones.map(z => addLatLonToZone(z));
+  return applyCors(Response.json(mapped));
 }
 
 export async function POST(req: Request) {
@@ -87,8 +89,7 @@ export async function POST(req: Request) {
         vertices: true,
       },
     });
-
-    return applyCors(Response.json(full, { status: 201 }));
+    return applyCors(Response.json(addLatLonToZone(full!), { status: 201 }));
   } catch (error) {
     return applyCors(new Response('Invalid data', { status: 400 }));
   }

@@ -13,9 +13,11 @@ interface Parcel {
   isFree?: boolean;
   lambertX?: number | null;
   lambertY?: number | null;
+  latitude?: number;
+  longitude?: number;
   area?: number | null;
   price?: number | null;
-  vertices?: { seq: number; lambertX: number; lambertY: number }[];
+  vertices?: { seq: number; lambertX: number; lambertY: number; lat?: number; lon?: number }[];
 }
 
 interface Zone {
@@ -24,8 +26,10 @@ interface Zone {
   status: string;
   lambertX?: number | null;
   lambertY?: number | null;
+  latitude?: number;
+  longitude?: number;
   parcels: Parcel[];
-  vertices?: { seq: number; lambertX: number; lambertY: number }[];
+  vertices?: { seq: number; lambertX: number; lambertY: number; lat?: number; lon?: number }[];
 }
 
 export default function ZoneMap({ zone }: { zone: Zone }) {
@@ -67,20 +71,26 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
     return [cx, cy]
   }
 
-  const center = zone.vertices && zone.vertices.length
-    ? (() => {
-        const verts = [...zone.vertices].sort((a, b) => a.seq - b.seq)
-        const c = centroid(verts)
-        return c ? toLatLng(c[0], c[1]) : [31.7, -6.5]
-      })()
-    : zone.lambertX != null && zone.lambertY != null
-      ? toLatLng(zone.lambertX, zone.lambertY)
-      : [31.7, -6.5]
+  const center = zone.latitude != null && zone.longitude != null
+    ? [zone.latitude, zone.longitude]
+    : zone.vertices && zone.vertices.length
+      ? (() => {
+          const verts = [...zone.vertices].sort((a, b) => a.seq - b.seq)
+          const c = centroid(verts)
+          return c ? toLatLng(c[0], c[1]) : [31.7, -6.5]
+        })()
+      : zone.lambertX != null && zone.lambertY != null
+        ? toLatLng(zone.lambertX, zone.lambertY)
+        : [31.7, -6.5]
 
   const zonePolygon: [number, number][] = zone.vertices && zone.vertices.length
     ? zone.vertices
         .sort((a, b) => a.seq - b.seq)
-        .map((v) => toLatLng(v.lambertX, v.lambertY))
+        .map((v) =>
+          v.lat != null && v.lon != null
+            ? [v.lat, v.lon]
+            : toLatLng(v.lambertX, v.lambertY)
+        )
     : (() => {
         const [lat, lon] = center;
         return [
@@ -95,7 +105,11 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
     p.vertices && p.vertices.length
       ? p.vertices
           .sort((a, b) => a.seq - b.seq)
-          .map((v) => toLatLng(v.lambertX, v.lambertY))
+          .map((v) =>
+            v.lat != null && v.lon != null
+              ? [v.lat, v.lon]
+              : toLatLng(v.lambertX, v.lambertY)
+          )
       : (() => {
           const size = 100; // meters in Lambert units
           const baseX = p.lambertX ?? zone.lambertX ?? 0;

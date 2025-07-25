@@ -1,5 +1,6 @@
 import { applyCors, corsOptions } from "@/lib/cors";
 import { prisma } from "@/lib/prisma";
+import { addLatLonToZone } from "@/lib/coords";
 import crypto from "crypto";
 
 export async function GET(
@@ -22,7 +23,7 @@ export async function GET(
     return applyCors(new Response("Not Found", { status: 404 }));
   }
 
-  return applyCors(Response.json(zone));
+  return applyCors(Response.json(addLatLonToZone(zone)));
 }
 
 export async function PUT(
@@ -75,8 +76,7 @@ export async function PUT(
         zoneType: true,
       },
     });
-
-    return applyCors(Response.json(zone));
+    return applyCors(Response.json(addLatLonToZone(zone!)));
   } catch (error) {
     return applyCors(new Response('Invalid data', { status: 400 }));
   }

@@ -35,3 +35,50 @@ export function polygonCentroid(vertices: { lambertX: number, lambertY: number }
   return [cx, cy]
 }
 
+export function addLatLonToParcel<T extends { lambertX: number | null | undefined, lambertY: number | null | undefined, vertices?: any[] }>(parcel: T): T & { latitude?: number, longitude?: number } {
+  let point: [number, number] | null = null
+  if (parcel.vertices && parcel.vertices.length) {
+    const verts = [...parcel.vertices].sort((a, b) => a.seq - b.seq)
+    parcel.vertices = verts.map(v => {
+      const [lat, lon] = lambertToWGS84(v.lambertX, v.lambertY)
+      return { ...v, lat, lon }
+    })
+    const c = polygonCentroid(verts)
+    if (c) point = c
+  }
+  if (!point && parcel.lambertX != null && parcel.lambertY != null) {
+    point = [parcel.lambertX, parcel.lambertY]
+  }
+  if (point) {
+    const [lat, lon] = lambertToWGS84(point[0], point[1])
+    ;(parcel as any).latitude = lat
+    ;(parcel as any).longitude = lon
+  }
+  return parcel as any
+}
+
+export function addLatLonToZone<T extends { lambertX: number | null | undefined, lambertY: number | null | undefined, vertices?: any[], parcels?: any[] }>(zone: T): T & { latitude?: number, longitude?: number } {
+  if (zone.vertices && zone.vertices.length) {
+    const verts = [...zone.vertices].sort((a, b) => a.seq - b.seq)
+    zone.vertices = verts.map(v => {
+      const [lat, lon] = lambertToWGS84(v.lambertX, v.lambertY)
+      return { ...v, lat, lon }
+    })
+    const c = polygonCentroid(verts)
+    if (c) {
+      const [lat, lon] = lambertToWGS84(c[0], c[1])
+      ;(zone as any).latitude = lat
+      ;(zone as any).longitude = lon
+    }
+  }
+  if ((zone as any).latitude == null && zone.lambertX != null && zone.lambertY != null) {
+    const [lat, lon] = lambertToWGS84(zone.lambertX, zone.lambertY)
+    ;(zone as any).latitude = lat
+    ;(zone as any).longitude = lon
+  }
+  if (zone.parcels) {
+    zone.parcels = zone.parcels.map(p => addLatLonToParcel(p))
+  }
+  return zone as any
+}
+

@@ -16,9 +16,11 @@ interface Parcel {
   status: string;
   lambertX: number | null;
   lambertY: number | null;
+  latitude?: number;
+  longitude?: number;
   area?: number | null;
   price?: number | null;
-  vertices?: { seq: number; lambertX: number; lambertY: number }[];
+  vertices?: { seq: number; lambertX: number; lambertY: number; lat?: number; lon?: number }[];
 }
 
 interface Zone {
@@ -28,6 +30,8 @@ interface Zone {
   status: string;
   lambertX: number | null;
   lambertY: number | null;
+  latitude?: number;
+  longitude?: number;
   totalArea?: number | null;
   price?: number | null;
   region?: { name: string } | null;
@@ -35,7 +39,7 @@ interface Zone {
   activities?: { activity: { name: string } }[];
   amenities?: { amenity: { name: string } }[];
   parcels: Parcel[];
-  vertices?: { seq: number; lambertX: number; lambertY: number }[];
+  vertices?: { seq: number; lambertX: number; lambertY: number; lat?: number; lon?: number }[];
 }
 
 export default function ZonePage() {
