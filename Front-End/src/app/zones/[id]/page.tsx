@@ -14,8 +14,6 @@ interface Parcel {
   id: string;
   reference: string;
   status: string;
-  lambertX: number | null;
-  lambertY: number | null;
   latitude?: number;
   longitude?: number;
   area?: number | null;
@@ -28,8 +26,6 @@ interface Zone {
   name: string;
   description?: string;
   status: string;
-  lambertX: number | null;
-  lambertY: number | null;
   latitude?: number;
   longitude?: number;
   totalArea?: number | null;
