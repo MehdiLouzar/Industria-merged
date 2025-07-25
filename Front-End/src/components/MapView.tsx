@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import L from 'leaflet'
 import MarkerClusterGroup from 'react-leaflet-markercluster'
 import 'leaflet/dist/leaflet.css'
@@ -14,6 +14,7 @@ import shadowUrl from 'leaflet/dist/images/marker-shadow.png'
 
 L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl })
 import { fetchApi } from '@/lib/utils'
+import { ports, trainStations, busStations, highways } from '@/data/infrastructure'
 
 type ZoneFeature = {
   geometry: { type: string; coordinates: [number, number] }
@@ -44,6 +45,9 @@ export default function MapView() {
     html: '<div style="background:#e53e3e;border-radius:50%;width:12px;height:12px;border:2px solid white"></div>',
     className: ''
   })
+  const portIcon = L.divIcon({ html: '⚓', className: 'text-xl' })
+  const trainIcon = L.divIcon({ html: '🚆', className: 'text-xl' })
+  const busIcon = L.divIcon({ html: '🚌', className: 'text-xl' })
 
   useEffect(() => {
     fetchApi<{ features: ZoneFeature[] }>("/api/map/zones")
@@ -112,6 +116,17 @@ export default function MapView() {
           </Marker>
         ))}
       </MarkerClusterGroup>
+      {highways.map((h, i) => (
+        <Polyline key={i} positions={h.path} pathOptions={{ color: '#ff5722' }} />
+      ))}
+      {[...ports, ...trainStations, ...busStations].map((m, i) => {
+        const icon = m.type === 'port' ? portIcon : m.type === 'train' ? trainIcon : busIcon
+        return (
+          <Marker key={`inf-${i}`} position={m.position} icon={icon}>
+            <Popup>{m.name}</Popup>
+          </Marker>
+        )
+      })}
     </MapContainer>
   )
 }
