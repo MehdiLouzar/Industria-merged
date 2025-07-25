@@ -71,6 +71,61 @@ CREATE TRIGGER trg_parcel_latlon
   BEFORE INSERT OR UPDATE OF "lambertX", "lambertY" ON parcels
   FOR EACH ROW EXECUTE FUNCTION update_parcel_latlon();
 
+-- When polygon vertices change, recompute centroid-based latitude/longitude
+CREATE OR REPLACE FUNCTION refresh_zone_centroid(zid TEXT) RETURNS VOID AS $$
+DECLARE
+  pt geometry;
+BEGIN
+  SELECT ST_Centroid(ST_Collect(ST_SetSRID(ST_MakePoint("lambertX","lambertY"),26191)))
+    INTO pt FROM zone_vertices WHERE "zoneId" = zid;
+  IF pt IS NOT NULL THEN
+    UPDATE zones
+      SET latitude  = ST_Y(ST_Transform(pt,4326)),
+          longitude = ST_X(ST_Transform(pt,4326))
+    WHERE id = zid;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION zone_vertex_changed() RETURNS TRIGGER AS $$
+BEGIN
+  PERFORM refresh_zone_centroid(COALESCE(NEW."zoneId", OLD."zoneId"));
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_zone_vert ON zone_vertices;
+CREATE TRIGGER trg_zone_vert
+  AFTER INSERT OR UPDATE OR DELETE ON zone_vertices
+  FOR EACH ROW EXECUTE FUNCTION zone_vertex_changed();
+
+CREATE OR REPLACE FUNCTION refresh_parcel_centroid(pid TEXT) RETURNS VOID AS $$
+DECLARE
+  pt geometry;
+BEGIN
+  SELECT ST_Centroid(ST_Collect(ST_SetSRID(ST_MakePoint("lambertX","lambertY"),26191)))
+    INTO pt FROM parcel_vertices WHERE "parcelId" = pid;
+  IF pt IS NOT NULL THEN
+    UPDATE parcels
+      SET latitude  = ST_Y(ST_Transform(pt,4326)),
+          longitude = ST_X(ST_Transform(pt,4326))
+    WHERE id = pid;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION parcel_vertex_changed() RETURNS TRIGGER AS $$
+BEGIN
+  PERFORM refresh_parcel_centroid(COALESCE(NEW."parcelId", OLD."parcelId"));
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_parcel_vert ON parcel_vertices;
+CREATE TRIGGER trg_parcel_vert
+  AFTER INSERT OR UPDATE OR DELETE ON parcel_vertices
+  FOR EACH ROW EXECUTE FUNCTION parcel_vertex_changed();
+
 -- Clean tables in order
 DO $$
 DECLARE
