@@ -9,6 +9,8 @@ export async function GET() {
       name: true,
       lambertX: true,
       lambertY: true,
+      latitude: true,
+      longitude: true,
       status: true,
       parcels: { select: { status: true, isFree: true } },
       activities: { select: { activity: { select: { icon: true } } } },
@@ -18,17 +20,23 @@ export async function GET() {
   });
 
   const features = zones.map(z => {
-    let point: [number, number] | null = null
+    let lat: number | null = null
+    let lon: number | null = null
     if (z.vertices.length) {
       const verts = z.vertices.sort((a, b) => a.seq - b.seq)
       const c = polygonCentroid(verts)
-      if (c) point = c
+      if (c) {
+        ;[lat, lon] = lambertToWGS84(c[0], c[1])
+      }
     }
-    if (!point && z.lambertX != null && z.lambertY != null) {
-      point = [z.lambertX, z.lambertY]
+    if (lat == null && z.latitude != null && z.longitude != null) {
+      lat = z.latitude
+      lon = z.longitude
     }
-    if (!point) return null;
-    const [lat, lon] = lambertToWGS84(point[0], point[1]);
+    if (lat == null && z.lambertX != null && z.lambertY != null) {
+      ;[lat, lon] = lambertToWGS84(z.lambertX, z.lambertY)
+    }
+    if (lat == null || lon == null) return null
     return {
       type: "Feature",
       geometry: { type: "Point", coordinates: [lon, lat] },

@@ -9,7 +9,13 @@ ALTER TABLE parcels
   ADD COLUMN IF NOT EXISTS "isFree" BOOLEAN DEFAULT TRUE,
   ADD COLUMN IF NOT EXISTS "isShowroom" BOOLEAN DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS cos FLOAT,
-  ADD COLUMN IF NOT EXISTS cus FLOAT;
+  ADD COLUMN IF NOT EXISTS cus FLOAT,
+  ADD COLUMN IF NOT EXISTS latitude FLOAT,
+  ADD COLUMN IF NOT EXISTS longitude FLOAT;
+
+ALTER TABLE zones
+  ADD COLUMN IF NOT EXISTS latitude FLOAT,
+  ADD COLUMN IF NOT EXISTS longitude FLOAT;
 
 -- Optional tables to store Lambert coordinates for drawing polygons
 CREATE TABLE IF NOT EXISTS zone_vertices (
@@ -25,6 +31,45 @@ CREATE TABLE IF NOT EXISTS parcel_vertices (
   "lambertX" FLOAT NOT NULL,
   "lambertY" FLOAT NOT NULL
 );
+
+-- Functions to keep latitude/longitude in sync with Lambert coordinates
+CREATE OR REPLACE FUNCTION update_zone_latlon() RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW."lambertX" IS NOT NULL AND NEW."lambertY" IS NOT NULL THEN
+    SELECT ST_Y(ST_Transform(ST_SetSRID(ST_MakePoint(NEW."lambertX", NEW."lambertY"),26191),4326)),
+           ST_X(ST_Transform(ST_SetSRID(ST_MakePoint(NEW."lambertX", NEW."lambertY"),26191),4326))
+      INTO NEW.latitude, NEW.longitude;
+  ELSE
+    NEW.latitude := NULL;
+    NEW.longitude := NULL;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION update_parcel_latlon() RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW."lambertX" IS NOT NULL AND NEW."lambertY" IS NOT NULL THEN
+    SELECT ST_Y(ST_Transform(ST_SetSRID(ST_MakePoint(NEW."lambertX", NEW."lambertY"),26191),4326)),
+           ST_X(ST_Transform(ST_SetSRID(ST_MakePoint(NEW."lambertX", NEW."lambertY"),26191),4326))
+      INTO NEW.latitude, NEW.longitude;
+  ELSE
+    NEW.latitude := NULL;
+    NEW.longitude := NULL;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_zone_latlon ON zones;
+CREATE TRIGGER trg_zone_latlon
+  BEFORE INSERT OR UPDATE OF "lambertX", "lambertY" ON zones
+  FOR EACH ROW EXECUTE FUNCTION update_zone_latlon();
+
+DROP TRIGGER IF EXISTS trg_parcel_latlon ON parcels;
+CREATE TRIGGER trg_parcel_latlon
+  BEFORE INSERT OR UPDATE OF "lambertX", "lambertY" ON parcels
+  FOR EACH ROW EXECUTE FUNCTION update_parcel_latlon();
 
 -- Clean tables in order
 DO $$
