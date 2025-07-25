@@ -55,9 +55,9 @@ export default function MapView() {
         if (!d) return
         const conv = d.features.map((f) => ({
           ...f,
+          // convert to [lat, lon] for Leaflet
           geometry: {
             type: f.geometry.type,
-            // API already returns [lon, lat]
             coordinates: [f.geometry.coordinates[1], f.geometry.coordinates[0]],
           },
         }))
@@ -90,7 +90,7 @@ export default function MapView() {
         {zones.map(z => (
           <Marker
             key={z.properties.id}
-            position={[z.geometry.coordinates[1], z.geometry.coordinates[0]]}
+            position={z.geometry.coordinates}
           >
             <Popup>
               <div className="space-y-1 text-sm p-1">
@@ -124,7 +124,7 @@ export default function MapView() {
         {parcels.map(p => (
           <Marker
             key={p.properties.id}
-            position={[p.geometry.coordinates[1], p.geometry.coordinates[0]]}
+            position={p.geometry.coordinates}
             icon={p.properties.isShowroom ? showroomIcon : parcelIcon}
           >
             <Popup>
