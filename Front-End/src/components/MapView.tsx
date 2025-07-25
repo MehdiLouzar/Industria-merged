@@ -11,10 +11,19 @@ import 'react-leaflet-markercluster/styles'
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png'
 import iconUrl from 'leaflet/dist/images/marker-icon.png'
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png'
+import proj4 from 'proj4'
 
 L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl })
 import { fetchApi } from '@/lib/utils'
 import { ports, trainStations, busStations, highways } from '@/data/infrastructure'
+
+// Lambert Nord Maroc projection used by the API data
+const lambertMA = '+proj=lcc +lat_1=33.3 +lat_2=35.1 +lat_0=33 +lon_0=-5 +x_0=500000 +y_0=300000 +ellps=clrk80 +units=m +no_defs'
+
+const toLatLng = (x: number, y: number): [number, number] => {
+  const [lon, lat] = proj4(lambertMA, proj4.WGS84, [x, y])
+  return [lat, lon]
+}
 
 type ZoneFeature = {
   geometry: { type: string; coordinates: [number, number] }
@@ -51,10 +60,36 @@ export default function MapView() {
 
   useEffect(() => {
     fetchApi<{ features: ZoneFeature[] }>("/api/map/zones")
-      .then((d) => d && setZones(d.features))
+      .then((d) => {
+        if (!d) return
+        const conv = d.features.map((f) => ({
+          ...f,
+          geometry: {
+            type: f.geometry.type,
+            coordinates: toLatLng(
+              f.geometry.coordinates[0],
+              f.geometry.coordinates[1]
+            ),
+          },
+        }))
+        setZones(conv)
+      })
       .catch(console.error)
     fetchApi<{ features: ParcelFeature[] }>("/api/map/parcels")
-      .then((d) => d && setParcels(d.features))
+      .then((d) => {
+        if (!d) return
+        const conv = d.features.map((f) => ({
+          ...f,
+          geometry: {
+            type: f.geometry.type,
+            coordinates: toLatLng(
+              f.geometry.coordinates[0],
+              f.geometry.coordinates[1]
+            ),
+          },
+        }))
+        setParcels(conv)
+      })
       .catch(console.error)
   }, [])
 
