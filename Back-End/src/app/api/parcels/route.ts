@@ -1,9 +1,11 @@
 import { applyCors, corsOptions } from "@/lib/cors";
 import { prisma } from "@/lib/prisma";
+import { addLatLonToParcel } from "@/lib/coords";
 
 export async function GET() {
   const items = await prisma.parcel.findMany({ include: { vertices: true } });
-  return applyCors(Response.json(items));
+  const mapped = items.map(addLatLonToParcel);
+  return applyCors(Response.json(mapped));
 }
 
 export async function POST(req: Request) {
@@ -19,7 +21,7 @@ export async function POST(req: Request) {
       },
       include: { vertices: true },
     });
-    return applyCors(Response.json(item, { status: 201 }));
+    return applyCors(Response.json(addLatLonToParcel(item), { status: 201 }));
   } catch {
     return applyCors(new Response('Invalid data', { status: 400 }));
   }
