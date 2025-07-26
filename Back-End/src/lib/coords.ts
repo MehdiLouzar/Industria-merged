@@ -6,7 +6,7 @@ const lambertMA =
 
 export function lambertToWGS84(x: number, y: number): [number, number] {
   const [lon, lat] = proj4(lambertMA, proj4.WGS84, [x, y])
-  return [lat, lon]
+  return [lon, lat]
 }
 
 export function polygonCentroid(vertices: { lambertX: number, lambertY: number }[]): [number, number] | null {
@@ -42,8 +42,8 @@ export function addLatLonToParcel<T extends { lambertX: number | null | undefine
   if (parcel.vertices && parcel.vertices.length) {
     const verts = [...parcel.vertices].sort((a, b) => a.seq - b.seq)
     parcel.vertices = verts.map(v => {
-      const [lat, lon] = lambertToWGS84(v.lambertX, v.lambertY)
-      return { ...v, lat, lon }
+      const [lon, lat] = lambertToWGS84(v.lambertX, v.lambertY)
+      return { ...v, lon, lat }
     })
     const c = polygonCentroid(verts)
     if (c) point = c
@@ -52,7 +52,7 @@ export function addLatLonToParcel<T extends { lambertX: number | null | undefine
     point = [parcel.lambertX, parcel.lambertY]
   }
   if (point) {
-    const [lat, lon] = lambertToWGS84(point[0], point[1])
+    const [lon, lat] = lambertToWGS84(point[0], point[1])
     ;(parcel as any).latitude = lat
     ;(parcel as any).longitude = lon
   }
@@ -63,18 +63,18 @@ export function addLatLonToZone<T extends { lambertX: number | null | undefined,
   if (zone.vertices && zone.vertices.length) {
     const verts = [...zone.vertices].sort((a, b) => a.seq - b.seq)
     zone.vertices = verts.map(v => {
-      const [lat, lon] = lambertToWGS84(v.lambertX, v.lambertY)
-      return { ...v, lat, lon }
+      const [lon, lat] = lambertToWGS84(v.lambertX, v.lambertY)
+      return { ...v, lon, lat }
     })
     const c = polygonCentroid(verts)
     if (c) {
-      const [lat, lon] = lambertToWGS84(c[0], c[1])
+      const [lon, lat] = lambertToWGS84(c[0], c[1])
       ;(zone as any).latitude = lat
       ;(zone as any).longitude = lon
     }
   }
   if ((zone as any).latitude == null && zone.lambertX != null && zone.lambertY != null) {
-    const [lat, lon] = lambertToWGS84(zone.lambertX, zone.lambertY)
+    const [lon, lat] = lambertToWGS84(zone.lambertX, zone.lambertY)
     ;(zone as any).latitude = lat
     ;(zone as any).longitude = lon
   }

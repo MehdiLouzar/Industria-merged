@@ -221,8 +221,8 @@ async function main() {
         status: ZoneStatus.AVAILABLE,
         lambertX: 423456.78,
         lambertY: 372890.12,
-        latitude: lambertToWGS84(423456.78, 372890.12)[0],
-        longitude: lambertToWGS84(423456.78, 372890.12)[1],
+        longitude: lambertToWGS84(423456.78, 372890.12)[0],
+        latitude: lambertToWGS84(423456.78, 372890.12)[1],
         zoneTypeId: zoneTypes[0].id,
         regionId: regions[0].id,
       }
@@ -237,8 +237,8 @@ async function main() {
         status: ZoneStatus.OCCUPIED,
         lambertX: 445123.45,
         lambertY: 380567.89,
-        latitude: lambertToWGS84(445123.45, 380567.89)[0],
-        longitude: lambertToWGS84(445123.45, 380567.89)[1],
+        longitude: lambertToWGS84(445123.45, 380567.89)[0],
+        latitude: lambertToWGS84(445123.45, 380567.89)[1],
         zoneTypeId: zoneTypes[1].id,
         regionId: regions[0].id,
       }
@@ -253,8 +253,8 @@ async function main() {
         status: ZoneStatus.AVAILABLE,
         lambertX: 512345.67,
         lambertY: 412789.34,
-        latitude: lambertToWGS84(512345.67, 412789.34)[0],
-        longitude: lambertToWGS84(512345.67, 412789.34)[1],
+        longitude: lambertToWGS84(512345.67, 412789.34)[0],
+        latitude: lambertToWGS84(512345.67, 412789.34)[1],
         zoneTypeId: zoneTypes[0].id,
         regionId: regions[4].id,
       }
@@ -269,8 +269,8 @@ async function main() {
         status: ZoneStatus.RESERVED,
         lambertX: 467890.23,
         lambertY: 392456.78,
-        latitude: lambertToWGS84(467890.23, 392456.78)[0],
-        longitude: lambertToWGS84(467890.23, 392456.78)[1],
+        longitude: lambertToWGS84(467890.23, 392456.78)[0],
+        latitude: lambertToWGS84(467890.23, 392456.78)[1],
         zoneTypeId: zoneTypes[0].id,
         regionId: regions[1].id,
       }
@@ -286,7 +286,7 @@ async function main() {
   for (let i = 1; i <= 12; i++) {
     const lambertX = zones[0].lambertX! + (Math.random() - 0.5) * 100
     const lambertY = zones[0].lambertY! + (Math.random() - 0.5) * 100
-    const [lat, lon] = lambertToWGS84(lambertX, lambertY)
+    const [lon, lat] = lambertToWGS84(lambertX, lambertY)
     const parcel = await prisma.parcel.create({
       data: {
         reference: `CAS-${i.toString().padStart(3, '0')}`,
@@ -299,8 +299,8 @@ async function main() {
         cus: null,
         lambertX,
         lambertY,
-        latitude: lat,
         longitude: lon,
+        latitude: lat,
         zoneId: zones[0].id,
       }
     })
@@ -311,7 +311,7 @@ async function main() {
   for (let i = 1; i <= 15; i++) {
     const px = zones[1].lambertX! + (Math.random() - 0.5) * 100
     const py = zones[1].lambertY! + (Math.random() - 0.5) * 100
-    const [plat, plon] = lambertToWGS84(px, py)
+    const [plon, plat] = lambertToWGS84(px, py)
     const parcel = await prisma.parcel.create({
       data: {
         reference: `MOH-${i.toString().padStart(3, '0')}`,
@@ -324,8 +324,8 @@ async function main() {
         cus: null,
         lambertX: px,
         lambertY: py,
-        latitude: plat,
         longitude: plon,
+        latitude: plat,
         zoneId: zones[1].id,
       }
     })
