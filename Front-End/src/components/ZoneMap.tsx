@@ -39,7 +39,7 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
     '+proj=lcc +lat_1=33.3 +lat_2=35.1 +lat_0=33 +lon_0=-5.4 +x_0=500000 +y_0=300000 +ellps=clrk80 +units=m +no_defs';
   const toLatLng = (x: number, y: number): [number, number] => {
     const [lon, lat] = proj4(lambertMA, proj4.WGS84, [x, y]);
-    return [lat, lon];
+    return [lon, lat];
   };
 
   const centroid = (verts: { lambertX: number; lambertY: number }[]): [number, number] | null => {
@@ -77,10 +77,12 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
       ? (() => {
           const verts = [...zone.vertices].sort((a, b) => a.seq - b.seq)
           const c = centroid(verts)
-          return c ? toLatLng(c[0], c[1]) : [31.7, -6.5]
+          if (!c) return [31.7, -6.5]
+          const [lon, lat] = toLatLng(c[0], c[1])
+          return [lat, lon]
         })()
       : zone.lambertX != null && zone.lambertY != null
-        ? toLatLng(zone.lambertX, zone.lambertY)
+        ? (() => { const [lon, lat] = toLatLng(zone.lambertX, zone.lambertY); return [lat, lon] })()
         : [31.7, -6.5]
 
   const zonePolygon: [number, number][] = zone.vertices && zone.vertices.length
@@ -89,7 +91,7 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
         .map((v) =>
           v.lat != null && v.lon != null
             ? [v.lat, v.lon]
-            : toLatLng(v.lambertX, v.lambertY)
+            : (() => { const [lon, lat] = toLatLng(v.lambertX, v.lambertY); return [lat, lon] })()
         )
     : (() => {
         const [lat, lon] = center;
@@ -108,17 +110,17 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
           .map((v) =>
             v.lat != null && v.lon != null
               ? [v.lat, v.lon]
-              : toLatLng(v.lambertX, v.lambertY)
+              : (() => { const [lon, lat] = toLatLng(v.lambertX, v.lambertY); return [lat, lon] })()
           )
       : (() => {
           const size = 100; // meters in Lambert units
           const baseX = p.lambertX ?? zone.lambertX ?? 0;
           const baseY = p.lambertY ?? zone.lambertY ?? 0;
           return [
-            toLatLng(baseX - size, baseY - size),
-            toLatLng(baseX - size, baseY + size),
-            toLatLng(baseX + size, baseY + size),
-            toLatLng(baseX + size, baseY - size),
+            (() => { const [lon, lat] = toLatLng(baseX - size, baseY - size); return [lat, lon] })(),
+            (() => { const [lon, lat] = toLatLng(baseX - size, baseY + size); return [lat, lon] })(),
+            (() => { const [lon, lat] = toLatLng(baseX + size, baseY + size); return [lat, lon] })(),
+            (() => { const [lon, lat] = toLatLng(baseX + size, baseY - size); return [lat, lon] })(),
           ];
         })();
 
