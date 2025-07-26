@@ -41,7 +41,6 @@ terminal as admin and run:
 
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-```
 
 Alternatively you can run the same SQL using the Node helper:
 

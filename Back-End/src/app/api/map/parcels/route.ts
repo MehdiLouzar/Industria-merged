@@ -26,7 +26,7 @@ export async function GET() {
         const verts = p.vertices.sort((a, b) => a.seq - b.seq);
         const c = polygonCentroid(verts);
         if (c) {
-          ;[lat, lon] = lambertToWGS84(c[0], c[1]);
+          ;[lon, lat] = lambertToWGS84(c[0], c[1]);
         }
       }
       if (lat == null && p.latitude != null && p.longitude != null) {
@@ -34,7 +34,7 @@ export async function GET() {
         lon = p.longitude;
       }
       if (lat == null && p.lambertX != null && p.lambertY != null) {
-        ;[lat, lon] = lambertToWGS84(p.lambertX, p.lambertY);
+        ;[lon, lat] = lambertToWGS84(p.lambertX, p.lambertY);
       }
       if (lat == null || lon == null) return null;
       return {

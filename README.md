@@ -69,7 +69,7 @@ local scripts for your user with:
 
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-```
+
 
 The script defaults to the `postgres` password if the `PGPASSWORD`
 environment variable is not set.
