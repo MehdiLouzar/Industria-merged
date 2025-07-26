@@ -37,7 +37,7 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
 
   // Use parameters matching EPSG:26191 so parcels align with database values
   const lambertMA =
-    '+proj=lcc +lat_1=33.3 +lat_0=33.3 +lon_0=-5.4 +k_0=0.999625769 +x_0=500000 +y_0=300000 +ellps=clrk80ign +units=m +no_defs';
+    '+proj=lcc +lat_1=33.3 +lat_0=33.3 +lon_0=-5.4 +k_0=0.999625769 +x_0=500000 +y_0=300000 +ellps=clrk80ign +towgs84=31,146,47,0,0,0,0 +units=m +no_defs';
   const toLatLng = (x: number, y: number): [number, number] => {
     const [lon, lat] = proj4(lambertMA, proj4.WGS84, [x, y]);
     return [lon, lat];
