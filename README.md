@@ -57,7 +57,18 @@ is not available:
 
 ```bash
 cd Back-End
-./scripts/run_initdb.sh
+./scripts/run_initdb.sh    # Linux/macOS
+# Windows helpers use PowerShell. The batch file works even when
+# script execution is disabled by policy.
+./scripts/run_initdb.bat   # or run the PowerShell script manually
+# powershell -ExecutionPolicy Bypass -File .\scripts\run_initdb.ps1
+```
+
+If PowerShell reports that script execution is disabled, you can allow
+local scripts for your user with:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 ```
 
 The script defaults to the `postgres` password if the `PGPASSWORD`
