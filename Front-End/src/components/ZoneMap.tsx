@@ -2,6 +2,7 @@
 
 import { MapContainer, TileLayer, Polygon, Popup } from "react-leaflet";
 import { useState } from "react";
+import proj4 from "proj4";
 import { Button } from "@/components/ui/button";
 import AppointmentForm from "@/components/AppointmentForm";
 
@@ -9,47 +10,123 @@ interface Parcel {
   id: string;
   reference: string;
   status: string;
-  latitude: number | null;
-  longitude: number | null;
+  isFree?: boolean;
+  lambertX?: number | null;
+  lambertY?: number | null;
+  latitude?: number;
+  longitude?: number;
   area?: number | null;
   price?: number | null;
+  vertices?: { seq: number; lambertX: number; lambertY: number; lat?: number; lon?: number }[];
 }
 
 interface Zone {
   id: string;
   name: string;
   status: string;
-  latitude: number | null;
-  longitude: number | null;
+  lambertX?: number | null;
+  lambertY?: number | null;
+  latitude?: number;
+  longitude?: number;
   parcels: Parcel[];
+  vertices?: { seq: number; lambertX: number; lambertY: number; lat?: number; lon?: number }[];
 }
 
 export default function ZoneMap({ zone }: { zone: Zone }) {
   const [selected, setSelected] = useState<Parcel | null>(null);
 
-  if (zone.latitude == null || zone.longitude == null) return null;
+  const lambertMA =
+    '+proj=lcc +lat_1=33.3 +lat_2=35.1 +lat_0=33 +lon_0=-5 +x_0=500000 +y_0=300000 +ellps=clrk80 +units=m +no_defs';
+  const toLatLng = (x: number, y: number): [number, number] => {
+    const [lon, lat] = proj4(lambertMA, proj4.WGS84, [x, y]);
+    return [lat, lon];
+  };
 
-  const zonePolygon: [number, number][] = [
-    [zone.latitude + 0.01, zone.longitude - 0.01],
-    [zone.latitude + 0.01, zone.longitude + 0.01],
-    [zone.latitude - 0.01, zone.longitude + 0.01],
-    [zone.latitude - 0.01, zone.longitude - 0.01],
-  ];
+  const centroid = (verts: { lambertX: number; lambertY: number }[]): [number, number] | null => {
+    if (!verts.length) return null
+    if (verts.length < 3) {
+      const sum = verts.reduce((acc, v) => [acc[0] + v.lambertX, acc[1] + v.lambertY], [0,0])
+      return [sum[0] / verts.length, sum[1] / verts.length]
+    }
+    let area = 0
+    let cx = 0
+    let cy = 0
+    for (let i = 0; i < verts.length; i++) {
+      const x1 = verts[i].lambertX
+      const y1 = verts[i].lambertY
+      const x2 = verts[(i+1)%verts.length].lambertX
+      const y2 = verts[(i+1)%verts.length].lambertY
+      const f = x1*y2 - x2*y1
+      area += f
+      cx += (x1 + x2) * f
+      cy += (y1 + y2) * f
+    }
+    area *= 0.5
+    if (area === 0) {
+      const sum = verts.reduce((acc, v) => [acc[0] + v.lambertX, acc[1] + v.lambertY], [0,0])
+      return [sum[0] / verts.length, sum[1] / verts.length]
+    }
+    cx /= (6*area)
+    cy /= (6*area)
+    return [cx, cy]
+  }
 
-  const size = 0.002;
-  const parcelPoly = (p: Parcel): [number, number][] => [
-    [p.latitude! + size, p.longitude! - size],
-    [p.latitude! + size, p.longitude! + size],
-    [p.latitude! - size, p.longitude! + size],
-    [p.latitude! - size, p.longitude! - size],
-  ];
+  const center = zone.latitude != null && zone.longitude != null
+    ? [zone.latitude, zone.longitude]
+    : zone.vertices && zone.vertices.length
+      ? (() => {
+          const verts = [...zone.vertices].sort((a, b) => a.seq - b.seq)
+          const c = centroid(verts)
+          return c ? toLatLng(c[0], c[1]) : [31.7, -6.5]
+        })()
+      : zone.lambertX != null && zone.lambertY != null
+        ? toLatLng(zone.lambertX, zone.lambertY)
+        : [31.7, -6.5]
+
+  const zonePolygon: [number, number][] = zone.vertices && zone.vertices.length
+    ? zone.vertices
+        .sort((a, b) => a.seq - b.seq)
+        .map((v) =>
+          v.lat != null && v.lon != null
+            ? [v.lat, v.lon]
+            : toLatLng(v.lambertX, v.lambertY)
+        )
+    : (() => {
+        const [lat, lon] = center;
+        return [
+          [lat + 0.01, lon - 0.01],
+          [lat + 0.01, lon + 0.01],
+          [lat - 0.01, lon + 0.01],
+          [lat - 0.01, lon - 0.01],
+        ];
+      })();
+
+  const parcelPoly = (p: Parcel): [number, number][] =>
+    p.vertices && p.vertices.length
+      ? p.vertices
+          .sort((a, b) => a.seq - b.seq)
+          .map((v) =>
+            v.lat != null && v.lon != null
+              ? [v.lat, v.lon]
+              : toLatLng(v.lambertX, v.lambertY)
+          )
+      : (() => {
+          const size = 100; // meters in Lambert units
+          const baseX = p.lambertX ?? zone.lambertX ?? 0;
+          const baseY = p.lambertY ?? zone.lambertY ?? 0;
+          return [
+            toLatLng(baseX - size, baseY - size),
+            toLatLng(baseX - size, baseY + size),
+            toLatLng(baseX + size, baseY + size),
+            toLatLng(baseX + size, baseY - size),
+          ];
+        })();
 
   const zoneColor: Record<string, string> = {
     AVAILABLE: "green",
-    PARTIALLY_OCCUPIED: "orange",
-    FULLY_OCCUPIED: "red",
-    UNDER_DEVELOPMENT: "gray",
-    RESERVED: "red",
+    RESERVED: "orange",
+    OCCUPIED: "red",
+    SHOWROOM: "blue",
   };
 
   const parcelColor = (s: string) => {
@@ -70,14 +147,11 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
   return (
     <>
       <MapContainer
-        center={[zone.latitude, zone.longitude]}
+        center={center}
         zoom={15}
-        style={{ height: 500, width: "100%" }}
+        style={{ height: 350, width: "100%" }}
       >
-        <TileLayer
-          url={`https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`}
-          id="mapbox/streets-v11"
-        />
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <Polygon
           positions={zonePolygon}
           pathOptions={{ color: zoneColor[zone.status] || "blue" }}
@@ -91,8 +165,7 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
         </Polygon>
         {zone.parcels.map(
           (p) =>
-            p.latitude &&
-            p.longitude && (
+            (p.lambertX != null && p.lambertY != null) && (
               <Polygon
                 key={p.id}
                 positions={parcelPoly(p)}
@@ -104,7 +177,7 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
                     {p.area && <div>Surface: {p.area} m²</div>}
                     {p.price && <div>Prix: {p.price} DH</div>}
                     <div>Statut: {p.status}</div>
-                    {p.status === "AVAILABLE" && (
+                    {p.status === "AVAILABLE" && p.isFree && (
                       <Button
                         size="sm"
                         className="mt-1"
