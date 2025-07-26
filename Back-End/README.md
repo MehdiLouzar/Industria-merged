@@ -63,3 +63,8 @@ or `lambertY` change. Extra triggers recompute these GPS fields whenever a
 vertex is inserted, updated or removed so the centroid stays consistent with
 the polygon shape.
 
+Coordinate conversions use the official Lambert Nord Maroc projection
+(EPSG:26191) with the datum shift so results match PostGIS exactly. Helper
+utilities return `[longitude, latitude]` to avoid confusion when building
+GeoJSON features.
+
