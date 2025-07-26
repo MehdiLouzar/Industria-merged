@@ -57,7 +57,9 @@ is not available:
 
 ```bash
 cd Back-End
-./scripts/run_initdb.sh
+./scripts/run_initdb.sh    # Linux/macOS
+# Windows users can run the PowerShell version
+powershell -ExecutionPolicy Bypass -File .\scripts\run_initdb.ps1
 ```
 
 The script defaults to the `postgres` password if the `PGPASSWORD`

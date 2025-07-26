@@ -30,7 +30,9 @@ Connection parameters can be customised via `DB_HOST`, `DB_PORT`, `DB_USER` and
 is not set.
 
 ```bash
-./scripts/run_initdb.sh
+./scripts/run_initdb.sh    # Linux/macOS
+# Windows:
+powershell -ExecutionPolicy Bypass -File .\scripts\run_initdb.ps1
 ```
 
 Alternatively you can run the same SQL using the Node helper:
