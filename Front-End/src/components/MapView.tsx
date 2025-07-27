@@ -49,6 +49,8 @@ export default function MapView() {
   const glLayerRef = useRef<{ getMaplibreMap(): maplibregl.Map; remove(): void } | null>(null)
   const glMapRef = useRef<maplibregl.Map | null>(null)
   const glLoaded = useRef(false)
+  const lastBbox = useRef('')
+  const debounceRef = useRef<number>()
 
   useEffect(() => {
     if (!mapRef.current) return
@@ -87,10 +89,7 @@ export default function MapView() {
     iconAnchor: [10, 10],
   })
 
-  const loadOverpassData = useCallback(async () => {
-    if (!mapRef.current || !glMapRef.current || !glLoaded.current) return
-    const b = mapRef.current.getBounds()
-    const bbox = `${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`
+  const fetchOverpassData = useCallback(async (bbox: string) => {
     const query = `[out:json][timeout:25];(
       way["highway"~"motorway|trunk"](${bbox});
       node["railway"="station"](${bbox});
@@ -147,6 +146,21 @@ export default function MapView() {
       console.error('Overpass fetch failed', err)
     }
   }, [])
+
+  const loadOverpassData = useCallback(() => {
+    if (!mapRef.current || !glMapRef.current || !glLoaded.current) return
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
+    debounceRef.current = window.setTimeout(() => {
+      if (!mapRef.current) return
+      const b = mapRef.current.getBounds()
+      const bbox = `${b.getSouth().toFixed(2)},${b.getWest().toFixed(2)},${b.getNorth().toFixed(2)},${b.getEast().toFixed(2)}`
+      if (bbox === lastBbox.current) return
+      lastBbox.current = bbox
+      fetchOverpassData(bbox)
+    }, 300)
+  }, [fetchOverpassData])
 
   useEffect(() => {
     fetchApi<{ features: ZoneFeature[] }>("/api/map/zones")
