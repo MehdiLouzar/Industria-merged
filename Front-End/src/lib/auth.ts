@@ -18,7 +18,7 @@ export const authOptions: NextAuthOptions = {
 
         try {
           // Appel à l'API backend pour l'authentification
-          const data = await fetchApi<{ user?: any }>("/api/auth/login", {
+          const data = await fetchApi<{ user?: Record<string, unknown> }>("/api/auth/login", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

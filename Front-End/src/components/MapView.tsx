@@ -84,10 +84,17 @@ export default function MapView() {
 
   useEffect(() => {
     if (!mapRef.current) return
-    const gl = (L as any).maplibreGL({
-      style: 'https://demotiles.maplibre.org/style.json',
-      interactive: false,
-    }).addTo(mapRef.current)
+    const LMaplibre = L as unknown as typeof L & {
+      maplibreGL: (opts: { style: string; interactive: boolean }) => {
+        addTo(map: L.Map): {
+          getMaplibreMap(): maplibregl.Map
+          remove(): void
+        }
+      }
+    }
+    const gl = LMaplibre
+      .maplibreGL({ style: 'https://demotiles.maplibre.org/style.json', interactive: false })
+      .addTo(mapRef.current)
     const map = gl.getMaplibreMap() as maplibregl.Map
 
     const load = () => {
@@ -114,13 +121,15 @@ export default function MapView() {
               type: 'line',
               source: 'overpass',
               filter: ['==', 'highway', 'motorway'],
-              paint: { 'line-color': '#0000ff', 'line-width': 20 },
+              minzoom: 0,
+              paint: { 'line-color': '#0000ff', 'line-width': 10 },
             })
             map.addLayer({
               id: 'stations',
               type: 'circle',
               source: 'overpass',
               filter: ['any', ['==', 'railway', 'station'], ['==', 'public_transport', 'station']],
+              minzoom: 5,
               paint: { 'circle-radius': 6, 'circle-color': '#0066ff' },
             })
             map.addLayer({
@@ -128,6 +137,7 @@ export default function MapView() {
               type: 'circle',
               source: 'overpass',
               filter: ['has', 'harbour'],
+              minzoom: 5,
               paint: { 'circle-radius': 6, 'circle-color': '#333' },
             })
             map.addLayer({
@@ -135,6 +145,7 @@ export default function MapView() {
               type: 'circle',
               source: 'overpass',
               filter: ['==', 'aeroway', 'aerodrome'],
+              minzoom: 5,
               paint: { 'circle-radius': 6, 'circle-color': '#0a0' },
             })
           }
@@ -155,14 +166,15 @@ export default function MapView() {
 
 
   return (
-    <MapContainer
-      center={[31.7, -6.5]}
-      zoom={6}
-      style={{ height: 600, width: '100%' }}
-      whenCreated={(m) => {
-        mapRef.current = m
-      }}
-    >
+    <div className="relative">
+      <MapContainer
+        center={[31.7, -6.5]}
+        zoom={6}
+        style={{ height: 600, width: '100%' }}
+        whenCreated={(m) => {
+          mapRef.current = m
+        }}
+      >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <MarkerClusterGroup
         showCoverageOnHover={false}
@@ -218,6 +230,25 @@ export default function MapView() {
           </Marker>
         ))}
       </MarkerClusterGroup>
-    </MapContainer>
+      </MapContainer>
+      <div className="absolute bottom-2 right-2 bg-white/80 p-2 text-xs rounded shadow space-y-1">
+        <div>
+          <span className="inline-block w-6 border-b-8 border-blue-600 align-middle mr-1"></span>
+          Autoroutes
+        </div>
+        <div>
+          <span className="inline-block w-3 h-3 bg-blue-600 rounded-full align-middle mr-1"></span>
+          Gares
+        </div>
+        <div>
+          <span className="inline-block w-3 h-3 bg-gray-700 rounded-full align-middle mr-1"></span>
+          Ports
+        </div>
+        <div>
+          <span className="inline-block w-3 h-3 bg-green-700 rounded-full align-middle mr-1"></span>
+          Aéroports
+        </div>
+      </div>
+    </div>
   )
 }
