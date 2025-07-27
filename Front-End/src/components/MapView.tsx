@@ -1,10 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
-import { Anchor, TrainFront, Bus } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 import MarkerClusterGroup from 'react-leaflet-markercluster'
 import 'leaflet/dist/leaflet.css'
@@ -15,8 +13,12 @@ import iconUrl from 'leaflet/dist/images/marker-icon.png'
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png'
 L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl })
 import { fetchApi } from '@/lib/utils'
-import { ports, trainStations, busStations, highways } from '@/data/infrastructure'
 import DynamicIcon from '@/components/DynamicIcon'
+import maplibregl from 'maplibre-gl'
+import '@maplibre/maplibre-gl-leaflet'
+import 'maplibre-gl/dist/maplibre-gl.css'
+import osmtogeojson from 'osmtogeojson'
+import type { FeatureCollection } from 'geojson'
 
 
 type ZoneFeature = {
@@ -39,6 +41,7 @@ type ParcelFeature = {
 export default function MapView() {
   const [zones, setZones] = useState<ZoneFeature[]>([])
   const [parcels, setParcels] = useState<ParcelFeature[]>([])
+  const mapRef = useRef<L.Map | null>(null)
 
   const parcelIcon = L.divIcon({
     html: '<div style="background:#3388ff;border-radius:50%;width:12px;height:12px;border:2px solid white"></div>',
@@ -46,18 +49,6 @@ export default function MapView() {
   })
   const showroomIcon = L.divIcon({
     html: '<div style="background:#e53e3e;border-radius:50%;width:12px;height:12px;border:2px solid white"></div>',
-    className: ''
-  })
-  const portIcon = L.divIcon({
-    html: renderToStaticMarkup(<Anchor className="w-5 h-5" />),
-    className: ''
-  })
-  const trainIcon = L.divIcon({
-    html: renderToStaticMarkup(<TrainFront className="w-5 h-5" />),
-    className: ''
-  })
-  const busIcon = L.divIcon({
-    html: renderToStaticMarkup(<Bus className="w-5 h-5" />),
     className: ''
   })
 
@@ -91,9 +82,83 @@ export default function MapView() {
       .catch(console.error)
   }, [])
 
+  useEffect(() => {
+    if (!mapRef.current) return
+    const gl = (L as any).maplibreGL({
+      style: 'https://demotiles.maplibre.org/style.json',
+      interactive: false,
+    }).addTo(mapRef.current)
+    const map = gl.getMaplibreMap() as maplibregl.Map
+
+    const load = () => {
+      if (!mapRef.current) return
+      const b = mapRef.current.getBounds()
+      const bbox = `${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`
+      const query = `[out:json][timeout:25];(
+        way["highway"="motorway"](${bbox});
+        node["railway"="station"](${bbox});
+        node["public_transport"="station"](${bbox});
+        node["harbour"](${bbox});
+        node["aeroway"="aerodrome"](${bbox});
+      );out geom;`
+      fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query))
+        .then(res => res.json())
+        .then(osm => {
+          const geojson = osmtogeojson(osm) as FeatureCollection
+          if (map.getSource('overpass')) {
+            (map.getSource('overpass') as maplibregl.GeoJSONSource).setData(geojson)
+          } else {
+            map.addSource('overpass', { type: 'geojson', data: geojson })
+            map.addLayer({
+              id: 'motorway',
+              type: 'line',
+              source: 'overpass',
+              filter: ['==', 'highway', 'motorway'],
+              paint: { 'line-color': '#ff0000', 'line-width': 2 },
+            })
+            map.addLayer({
+              id: 'stations',
+              type: 'circle',
+              source: 'overpass',
+              filter: ['any', ['==', 'railway', 'station'], ['==', 'public_transport', 'station']],
+              paint: { 'circle-radius': 4, 'circle-color': '#0066ff' },
+            })
+            map.addLayer({
+              id: 'ports',
+              type: 'circle',
+              source: 'overpass',
+              filter: ['has', 'harbour'],
+              paint: { 'circle-radius': 4, 'circle-color': '#333' },
+            })
+            map.addLayer({
+              id: 'airports',
+              type: 'circle',
+              source: 'overpass',
+              filter: ['==', 'aeroway', 'aerodrome'],
+              paint: { 'circle-radius': 4, 'circle-color': '#0a0' },
+            })
+          }
+        })
+        .catch(console.error)
+    }
+    mapRef.current.on('moveend', load)
+    load()
+    return () => {
+      mapRef.current?.off('moveend', load)
+      gl.remove()
+    }
+  }, [])
+
 
   return (
-    <MapContainer center={[31.7, -6.5]} zoom={6} style={{ height: 600, width: '100%' }}>
+    <MapContainer
+      center={[31.7, -6.5]}
+      zoom={6}
+      style={{ height: 600, width: '100%' }}
+      whenCreated={(m) => {
+        mapRef.current = m
+      }}
+    >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <MarkerClusterGroup
         showCoverageOnHover={false}
@@ -149,17 +214,6 @@ export default function MapView() {
           </Marker>
         ))}
       </MarkerClusterGroup>
-      {highways.map((h, i) => (
-        <Polyline key={i} positions={h.path} pathOptions={{ color: '#ff5722' }} />
-      ))}
-      {[...ports, ...trainStations, ...busStations].map((m, i) => {
-        const icon = m.type === 'port' ? portIcon : m.type === 'train' ? trainIcon : busIcon
-        return (
-          <Marker key={`inf-${i}`} position={m.position} icon={icon}>
-            <Popup>{m.name}</Popup>
-          </Marker>
-        )
-      })}
     </MapContainer>
   )
 }
