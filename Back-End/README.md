@@ -64,7 +64,8 @@ vertex is inserted, updated or removed so the centroid stays consistent with
 the polygon shape.
 
 Coordinate conversions use the official Lambert Nord Maroc projection
-(EPSG:26191) with the datum shift so results match PostGIS exactly. Helper
-utilities return `[longitude, latitude]` to avoid confusion when building
-GeoJSON features.
+(EPSG:26191) with the datum shift so results match PostGIS exactly.
+**The central meridian is `-5.4`; using `-5` yields points nearly 50&nbsp;km
+away.** Helper utilities return `[longitude, latitude]` to avoid confusion when
+building GeoJSON features.
 

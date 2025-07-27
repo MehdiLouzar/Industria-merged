@@ -95,11 +95,12 @@ to allow drawing shapes for zones and parcels.
 Zones and parcels keep their Lambert North Morocco coordinates (EPSG:26191) in
 the database. Coordinate conversions rely on the official projection
 parameters, including the datum shift, so the API returns the same GPS
-positions as PostGIS. Helper utilities now return `[longitude, latitude]`
-pairs. Map endpoints still convert vertices on the fly, but the centroid of
-each zone or parcel uses the stored WGS84 fields when available. Additional
-triggers update the GPS centroid whenever polygon vertices change so data
-remains consistent.
+positions as PostGIS. **The central meridian is `-5.4`; using `-5` would shift
+points by almost 50&nbsp;km.** Helper utilities now return `[longitude,
+latitude]` pairs. Map endpoints still convert vertices on the fly, but the
+centroid of each zone or parcel uses the stored WGS84 fields when available.
+Additional triggers update the GPS centroid whenever polygon vertices change so
+data remains consistent.
 
 You can also run the command manually:
 
