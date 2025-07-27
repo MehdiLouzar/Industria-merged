@@ -5,10 +5,11 @@ import crypto from "crypto";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const zone = await prisma.zone.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       parcels: { include: { vertices: true } },
       region: true,
@@ -28,45 +29,46 @@ export async function GET(
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const data = await req.json();
     const { vertices, activityIds, amenityIds, ...zoneData } = data;
 
-    await prisma.zone.update({ where: { id: params.id }, data: zoneData });
+    await prisma.zone.update({ where: { id }, data: zoneData });
 
     if (Array.isArray(vertices)) {
-      await prisma.zoneVertex.deleteMany({ where: { zoneId: params.id } });
+      await prisma.zoneVertex.deleteMany({ where: { zoneId: id } });
       await prisma.zoneVertex.createMany({
-        data: vertices.map((v: any) => ({ ...v, zoneId: params.id })),
+        data: vertices.map((v: any) => ({ ...v, zoneId: id })),
       });
     }
 
     if (Array.isArray(activityIds)) {
-      await prisma.zoneActivity.deleteMany({ where: { zoneId: params.id } });
+      await prisma.zoneActivity.deleteMany({ where: { zoneId: id } });
       await prisma.zoneActivity.createMany({
         data: activityIds.map((id: string) => ({
           id: crypto.randomUUID(),
-          zoneId: params.id,
+          zoneId: id,
           activityId: id,
         })),
       });
     }
 
     if (Array.isArray(amenityIds)) {
-      await prisma.zoneAmenity.deleteMany({ where: { zoneId: params.id } });
+      await prisma.zoneAmenity.deleteMany({ where: { zoneId: id } });
       await prisma.zoneAmenity.createMany({
         data: amenityIds.map((id: string) => ({
           id: crypto.randomUUID(),
-          zoneId: params.id,
+          zoneId: id,
           amenityId: id,
         })),
       });
     }
 
     const zone = await prisma.zone.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         vertices: true,
         parcels: { include: { vertices: true } },
@@ -84,10 +86,11 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await prisma.zone.delete({ where: { id: params.id } });
+    const { id } = await params
+    await prisma.zone.delete({ where: { id } });
     return applyCors(new Response(null, { status: 204 }));
   } catch (error) {
     return applyCors(new Response('Not Found', { status: 404 }));
