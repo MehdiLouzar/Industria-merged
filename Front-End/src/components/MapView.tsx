@@ -114,28 +114,28 @@ export default function MapView() {
               type: 'line',
               source: 'overpass',
               filter: ['==', 'highway', 'motorway'],
-              paint: { 'line-color': '#ff0000', 'line-width': 2 },
+              paint: { 'line-color': '#0000ff', 'line-width': 20 },
             })
             map.addLayer({
               id: 'stations',
               type: 'circle',
               source: 'overpass',
               filter: ['any', ['==', 'railway', 'station'], ['==', 'public_transport', 'station']],
-              paint: { 'circle-radius': 4, 'circle-color': '#0066ff' },
+              paint: { 'circle-radius': 6, 'circle-color': '#0066ff' },
             })
             map.addLayer({
               id: 'ports',
               type: 'circle',
               source: 'overpass',
               filter: ['has', 'harbour'],
-              paint: { 'circle-radius': 4, 'circle-color': '#333' },
+              paint: { 'circle-radius': 6, 'circle-color': '#333' },
             })
             map.addLayer({
               id: 'airports',
               type: 'circle',
               source: 'overpass',
               filter: ['==', 'aeroway', 'aerodrome'],
-              paint: { 'circle-radius': 4, 'circle-color': '#0a0' },
+              paint: { 'circle-radius': 6, 'circle-color': '#0a0' },
             })
           }
         })
