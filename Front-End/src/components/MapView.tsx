@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import Link from 'next/link'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
@@ -19,6 +20,7 @@ import '@maplibre/maplibre-gl-leaflet'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import osmtogeojson from 'osmtogeojson'
 import type { FeatureCollection } from 'geojson'
+import { TrainFront, Ship, Plane } from 'lucide-react'
 
 
 type ZoneFeature = {
@@ -41,6 +43,8 @@ type ParcelFeature = {
 export default function MapView() {
   const [zones, setZones] = useState<ZoneFeature[]>([])
   const [parcels, setParcels] = useState<ParcelFeature[]>([])
+  type Poi = { id: string; coordinates: [number, number]; type: 'station' | 'port' | 'airport' }
+  const [pois, setPois] = useState<Poi[]>([])
   const mapRef = useRef<L.Map | null>(null)
 
   const parcelIcon = L.divIcon({
@@ -50,6 +54,25 @@ export default function MapView() {
   const showroomIcon = L.divIcon({
     html: '<div style="background:#e53e3e;border-radius:50%;width:12px;height:12px;border:2px solid white"></div>',
     className: ''
+  })
+
+  const stationIcon = L.divIcon({
+    html: renderToStaticMarkup(<TrainFront width={20} height={20} stroke="#0066ff" />),
+    className: '',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+  })
+  const portIcon = L.divIcon({
+    html: renderToStaticMarkup(<Ship width={20} height={20} stroke="#333" />),
+    className: '',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+  })
+  const airportIcon = L.divIcon({
+    html: renderToStaticMarkup(<Plane width={20} height={20} stroke="#0a0" />),
+    className: '',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
   })
 
   useEffect(() => {
@@ -112,6 +135,23 @@ export default function MapView() {
         .then(res => res.json())
         .then(osm => {
           const geojson = osmtogeojson(osm) as FeatureCollection
+
+          const newPois: Poi[] = []
+          for (const f of geojson.features) {
+            if (f.geometry.type === 'Point') {
+              const [lon, lat] = f.geometry.coordinates as [number, number]
+              const props = f.properties as Record<string, unknown>
+              if (props.railway === 'station' || props.public_transport === 'station') {
+                newPois.push({ id: String(props['@id'] ?? `${lon}-${lat}`), coordinates: [lat, lon], type: 'station' })
+              } else if (props.harbour != null) {
+                newPois.push({ id: String(props['@id'] ?? `${lon}-${lat}`), coordinates: [lat, lon], type: 'port' })
+              } else if (props.aeroway === 'aerodrome') {
+                newPois.push({ id: String(props['@id'] ?? `${lon}-${lat}`), coordinates: [lat, lon], type: 'airport' })
+              }
+            }
+          }
+          setPois(newPois)
+
           if (map.getSource('overpass')) {
             (map.getSource('overpass') as maplibregl.GeoJSONSource).setData(geojson)
           } else {
@@ -123,30 +163,6 @@ export default function MapView() {
               filter: ['==', 'highway', 'motorway'],
               minzoom: 0,
               paint: { 'line-color': '#0000ff', 'line-width': 10 },
-            })
-            map.addLayer({
-              id: 'stations',
-              type: 'circle',
-              source: 'overpass',
-              filter: ['any', ['==', 'railway', 'station'], ['==', 'public_transport', 'station']],
-              minzoom: 5,
-              paint: { 'circle-radius': 6, 'circle-color': '#0066ff' },
-            })
-            map.addLayer({
-              id: 'ports',
-              type: 'circle',
-              source: 'overpass',
-              filter: ['has', 'harbour'],
-              minzoom: 5,
-              paint: { 'circle-radius': 6, 'circle-color': '#333' },
-            })
-            map.addLayer({
-              id: 'airports',
-              type: 'circle',
-              source: 'overpass',
-              filter: ['==', 'aeroway', 'aerodrome'],
-              minzoom: 5,
-              paint: { 'circle-radius': 6, 'circle-color': '#0a0' },
             })
           }
         })
@@ -229,9 +245,16 @@ export default function MapView() {
             </Popup>
           </Marker>
         ))}
+        {pois.map((poi) => (
+          <Marker
+            key={poi.id}
+            position={poi.coordinates}
+            icon={poi.type === 'station' ? stationIcon : poi.type === 'port' ? portIcon : airportIcon}
+          />
+        ))}
       </MarkerClusterGroup>
       </MapContainer>
-      <div className="absolute bottom-2 right-2 bg-white/80 p-2 text-xs rounded shadow space-y-1">
+      <div className="absolute bottom-2 right-2 bg-white/80 p-2 text-xs rounded shadow space-y-1 z-10">
         <div>
           <span className="inline-block w-6 border-b-8 border-blue-600 align-middle mr-1"></span>
           Autoroutes
