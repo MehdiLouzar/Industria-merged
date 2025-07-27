@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import Link from 'next/link'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
@@ -46,6 +46,9 @@ export default function MapView() {
   type Poi = { id: string; coordinates: [number, number]; type: 'station' | 'port' | 'airport' }
   const [pois, setPois] = useState<Poi[]>([])
   const mapRef = useRef<L.Map | null>(null)
+  const glLayerRef = useRef<{ getMaplibreMap(): maplibregl.Map; remove(): void } | null>(null)
+  const glMapRef = useRef<maplibregl.Map | null>(null)
+  const glLoaded = useRef(false)
 
   useEffect(() => {
     if (!mapRef.current) return
@@ -84,6 +87,67 @@ export default function MapView() {
     iconAnchor: [10, 10],
   })
 
+  const loadOverpassData = useCallback(async () => {
+    if (!mapRef.current || !glMapRef.current || !glLoaded.current) return
+    const b = mapRef.current.getBounds()
+    const bbox = `${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`
+    const query = `[out:json][timeout:25];(
+      way["highway"~"motorway|trunk"](${bbox});
+      node["railway"="station"](${bbox});
+      node["public_transport"="station"](${bbox});
+      node["harbour"](${bbox});
+      node["aeroway"="aerodrome"](${bbox});
+    );out geom;`
+    try {
+      const res = await fetch(
+        'https://overpass-api.de/api/interpreter?data=' +
+          encodeURIComponent(query)
+      )
+      if (!res.ok) {
+        console.error('Overpass HTTP error', res.status, res.statusText)
+        return
+      }
+      const osm = await res.json()
+      const geojson = osmtogeojson(osm) as FeatureCollection
+      console.log('Overpass features', geojson.features.length)
+
+      const newPois: Poi[] = []
+      for (const f of geojson.features) {
+        if (f.geometry.type === 'Point') {
+          const [lon, lat] = f.geometry.coordinates as [number, number]
+          const props = f.properties as Record<string, unknown>
+          if (props.railway === 'station' || props.public_transport === 'station') {
+            newPois.push({ id: String(props['@id'] ?? `${lon}-${lat}`), coordinates: [lat, lon], type: 'station' })
+          } else if (props.harbour != null) {
+            newPois.push({ id: String(props['@id'] ?? `${lon}-${lat}`), coordinates: [lat, lon], type: 'port' })
+          } else if (props.aeroway === 'aerodrome') {
+            newPois.push({ id: String(props['@id'] ?? `${lon}-${lat}`), coordinates: [lat, lon], type: 'airport' })
+          }
+        }
+      }
+      setPois(newPois)
+
+      if (glMapRef.current.getSource('overpass')) {
+        ;(glMapRef.current.getSource('overpass') as maplibregl.GeoJSONSource).setData(geojson)
+      } else {
+        glMapRef.current.addSource('overpass', { type: 'geojson', data: geojson })
+        glMapRef.current.addLayer({
+          id: 'highways',
+          type: 'line',
+          source: 'overpass',
+          filter: ['match', ['get', 'highway'], ['motorway', 'trunk'], true, false],
+          minzoom: 0,
+          paint: {
+            'line-color': '#0000ff',
+            'line-width': ['interpolate', ['linear'], ['zoom'], 5, 2, 8, 4, 12, 8, 16, 10],
+          },
+        })
+      }
+    } catch (err) {
+      console.error('Overpass fetch failed', err)
+    }
+  }, [])
+
   useEffect(() => {
     fetchApi<{ features: ZoneFeature[] }>("/api/map/zones")
       .then((d) => {
@@ -118,76 +182,33 @@ export default function MapView() {
     if (!mapRef.current) return
     const LMaplibre = L as unknown as typeof L & {
       maplibreGL: (opts: { style: string; interactive: boolean }) => {
-        addTo(map: L.Map): {
-          getMaplibreMap(): maplibregl.Map
-          remove(): void
-        }
+        addTo(map: L.Map): { getMaplibreMap(): maplibregl.Map; remove(): void }
       }
     }
-    const gl = LMaplibre
+    const layer = LMaplibre
       .maplibreGL({ style: 'https://demotiles.maplibre.org/style.json', interactive: false })
       .addTo(mapRef.current)
-    const map = gl.getMaplibreMap() as maplibregl.Map
+    glLayerRef.current = layer
+    const mlMap = layer.getMaplibreMap() as maplibregl.Map
+    glMapRef.current = mlMap
 
-    const load = () => {
-      if (!mapRef.current) return
-      const b = mapRef.current.getBounds()
-      const bbox = `${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`
-      const query = `[out:json][timeout:25];(
-        way["highway"="motorway"](${bbox});
-        node["railway"="station"](${bbox});
-        node["public_transport"="station"](${bbox});
-        node["harbour"](${bbox});
-        node["aeroway"="aerodrome"](${bbox});
-      );out geom;`
-      fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query))
-        .then(res => res.json())
-        .then(osm => {
-          const geojson = osmtogeojson(osm) as FeatureCollection
-
-          const newPois: Poi[] = []
-          for (const f of geojson.features) {
-            if (f.geometry.type === 'Point') {
-              const [lon, lat] = f.geometry.coordinates as [number, number]
-              const props = f.properties as Record<string, unknown>
-              if (props.railway === 'station' || props.public_transport === 'station') {
-                newPois.push({ id: String(props['@id'] ?? `${lon}-${lat}`), coordinates: [lat, lon], type: 'station' })
-              } else if (props.harbour != null) {
-                newPois.push({ id: String(props['@id'] ?? `${lon}-${lat}`), coordinates: [lat, lon], type: 'port' })
-              } else if (props.aeroway === 'aerodrome') {
-                newPois.push({ id: String(props['@id'] ?? `${lon}-${lat}`), coordinates: [lat, lon], type: 'airport' })
-              }
-            }
-          }
-          setPois(newPois)
-
-          if (map.getSource('overpass')) {
-            (map.getSource('overpass') as maplibregl.GeoJSONSource).setData(geojson)
-          } else {
-            map.addSource('overpass', { type: 'geojson', data: geojson })
-            map.addLayer({
-              id: 'motorway',
-              type: 'line',
-              source: 'overpass',
-              filter: ['==', 'highway', 'motorway'],
-              minzoom: 0,
-              paint: { 'line-color': '#0000ff', 'line-width': 10 },
-            })
-          }
-        })
-        .catch(console.error)
+    const handleLoad = () => {
+      glLoaded.current = true
+      setTimeout(() => {
+        loadOverpassData()
+        mapRef.current?.on('moveend', loadOverpassData)
+      }, 300)
     }
-    const onLoad = () => {
-      load()
-      mapRef.current?.on('moveend', load)
-    }
-    map.on('load', onLoad)
+
+    mlMap.on('load', handleLoad)
+
     return () => {
-      mapRef.current?.off('moveend', load)
-      map.off('load', onLoad)
-      gl.remove()
+      mapRef.current?.off('moveend', loadOverpassData)
+      mlMap.off('load', handleLoad)
+      glMapRef.current = null
+      glLayerRef.current?.remove()
     }
-  }, [])
+  }, [loadOverpassData])
 
 
   return (
