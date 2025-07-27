@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { Anchor, TrainFront, Bus } from 'lucide-react'
 import Link from 'next/link'
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import L from 'leaflet'
@@ -14,6 +16,7 @@ import shadowUrl from 'leaflet/dist/images/marker-shadow.png'
 L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl })
 import { fetchApi } from '@/lib/utils'
 import { ports, trainStations, busStations, highways } from '@/data/infrastructure'
+import DynamicIcon from '@/components/DynamicIcon'
 
 
 type ZoneFeature = {
@@ -45,9 +48,18 @@ export default function MapView() {
     html: '<div style="background:#e53e3e;border-radius:50%;width:12px;height:12px;border:2px solid white"></div>',
     className: ''
   })
-  const portIcon = L.divIcon({ html: '⚓', className: 'text-xl' })
-  const trainIcon = L.divIcon({ html: '🚆', className: 'text-xl' })
-  const busIcon = L.divIcon({ html: '🚌', className: 'text-xl' })
+  const portIcon = L.divIcon({
+    html: renderToStaticMarkup(<Anchor className="w-5 h-5" />),
+    className: ''
+  })
+  const trainIcon = L.divIcon({
+    html: renderToStaticMarkup(<TrainFront className="w-5 h-5" />),
+    className: ''
+  })
+  const busIcon = L.divIcon({
+    html: renderToStaticMarkup(<Bus className="w-5 h-5" />),
+    className: ''
+  })
 
   useEffect(() => {
     fetchApi<{ features: ZoneFeature[] }>("/api/map/zones")
@@ -100,14 +112,14 @@ export default function MapView() {
                 {z.properties.activityIcons.length > 0 && (
                   <div className="flex gap-1 text-xl">
                     {z.properties.activityIcons.map((ic, i) => (
-                      <span key={i}>{ic}</span>
+                      <DynamicIcon key={i} name={ic} className="w-5 h-5" />
                     ))}
                   </div>
                 )}
                 {z.properties.amenityIcons.length > 0 && (
                   <div className="flex gap-1 text-xl">
                     {z.properties.amenityIcons.map((ic, i) => (
-                      <span key={i}>{ic}</span>
+                      <DynamicIcon key={i} name={ic} className="w-5 h-5" />
                     ))}
                   </div>
                 )}

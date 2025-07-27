@@ -120,35 +120,35 @@ async function main() {
       data: {
         name: 'Automobile',
         description: 'Industrie automobile et équipementiers',
-        icon: '🚗',
+        icon: 'car',
       }
     }),
     prisma.activity.create({
       data: {
         name: 'Textile',
         description: 'Textile et confection',
-        icon: '👕',
+        icon: 'shirt',
       }
     }),
     prisma.activity.create({
       data: {
         name: 'Agroalimentaire',
         description: 'Industrie agroalimentaire',
-        icon: '🍎',
+        icon: 'apple',
       }
     }),
     prisma.activity.create({
       data: {
         name: 'Électronique',
         description: 'Composants électroniques',
-        icon: '💻',
+        icon: 'laptop',
       }
     }),
     prisma.activity.create({
       data: {
         name: 'Logistique',
         description: 'Stockage et distribution',
-        icon: '📦',
+        icon: 'package',
       }
     }),
   ])
@@ -161,7 +161,7 @@ async function main() {
       data: {
         name: 'Électricité',
         description: 'Alimentation électrique haute tension',
-        icon: '⚡',
+        icon: 'zap',
         category: 'Infrastructure',
       }
     }),
@@ -169,7 +169,7 @@ async function main() {
       data: {
         name: 'Eau potable',
         description: 'Réseau d\'eau potable',
-        icon: '💧',
+        icon: 'droplet',
         category: 'Infrastructure',
       }
     }),
@@ -177,7 +177,7 @@ async function main() {
       data: {
         name: 'Assainissement',
         description: 'Réseau d\'assainissement',
-        icon: '🚰',
+        icon: 'shower-head',
         category: 'Infrastructure',
       }
     }),
@@ -185,7 +185,7 @@ async function main() {
       data: {
         name: 'Télécommunications',
         description: 'Fibre optique et télécoms',
-        icon: '📡',
+        icon: 'wifi',
         category: 'Infrastructure',
       }
     }),
@@ -193,7 +193,7 @@ async function main() {
       data: {
         name: 'Accès routier',
         description: 'Routes d\'accès et voiries',
-        icon: '🛣️',
+        icon: 'route',
         category: 'Transport',
       }
     }),
@@ -201,7 +201,7 @@ async function main() {
       data: {
         name: 'Sécurité 24h/24',
         description: 'Surveillance et gardiennage',
-        icon: '🛡️',
+        icon: 'shield',
         category: 'Services',
       }
     }),

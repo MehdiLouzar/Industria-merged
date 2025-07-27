@@ -174,14 +174,14 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Activities
 INSERT INTO activities (id, name, description, icon, "createdAt", "updatedAt") VALUES
-  ('act-auto', 'Automobile', 'Industrie automobile', '🚗', NOW(), NOW()),
-  ('act-log',  'Logistique', 'Stockage et distribution', '📦', NOW(), NOW())
+  ('act-auto', 'Automobile', 'Industrie automobile', 'car', NOW(), NOW()),
+  ('act-log',  'Logistique', 'Stockage et distribution', 'package', NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- Amenities
 INSERT INTO amenities (id, name, description, icon, category, "createdAt", "updatedAt") VALUES
-  ('amn-electricity', 'Électricité', 'Alimentation électrique', '⚡', 'Infrastructure', NOW(), NOW()),
-  ('amn-water',       'Eau potable', 'Réseau d''eau',             '💧', 'Infrastructure', NOW(), NOW())
+  ('amn-electricity', 'Électricité', 'Alimentation électrique', 'zap', 'Infrastructure', NOW(), NOW()),
+  ('amn-water',       'Eau potable', 'Réseau d''eau',             'droplet', 'Infrastructure', NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- Demo zone

@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import AppointmentForm from "@/components/AppointmentForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import DynamicIcon from "@/components/DynamicIcon";
 import { fetchApi } from "@/lib/utils";
 
 interface Parcel {
@@ -83,7 +84,7 @@ export default function ZonePage() {
             <div className="flex flex-wrap gap-4">
               {zone.amenities.map((a, i) => (
                 <div key={i} className="flex flex-col items-center text-sm">
-                  <span className="text-2xl">{a.amenity.icon}</span>
+                  <DynamicIcon name={a.amenity.icon} className="w-6 h-6" />
                   <span>{a.amenity.name}</span>
                 </div>
               ))}
