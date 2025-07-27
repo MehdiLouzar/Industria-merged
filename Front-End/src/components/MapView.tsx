@@ -141,10 +141,14 @@ export default function MapView() {
         })
         .catch(console.error)
     }
-    mapRef.current.on('moveend', load)
-    load()
+    const onLoad = () => {
+      load()
+      mapRef.current?.on('moveend', load)
+    }
+    map.on('load', onLoad)
     return () => {
       mapRef.current?.off('moveend', load)
+      map.off('load', onLoad)
       gl.remove()
     }
   }, [])
