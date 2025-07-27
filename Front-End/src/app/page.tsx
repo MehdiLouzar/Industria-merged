@@ -1,13 +1,13 @@
 "use client";
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
-import dynamic from 'next/dynamic';
+import dynamicLib from 'next/dynamic';
 import ZoneGrid from '@/components/ZoneGrid';
 import Footer from '@/components/Footer';
 
 export const dynamic = 'force-dynamic';
 
-const MapView = dynamic(() => import('@/components/MapView'), { ssr: false });
+const MapView = dynamicLib(() => import('@/components/MapView'), { ssr: false });
 
 export default function Home() {
   return (
