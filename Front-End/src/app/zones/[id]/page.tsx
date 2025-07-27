@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
-const ZoneMap = dynamic(() => import("@/components/ZoneMap"), { ssr: false });
+const ZoneMap = dynamic(() => import("@/components/ZoneMap"), {
+  ssr: false,
+  loading: () => <p>Chargement de la carte...</p>,
+});
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AppointmentForm from "@/components/AppointmentForm";

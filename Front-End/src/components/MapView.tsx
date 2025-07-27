@@ -47,6 +47,15 @@ export default function MapView() {
   const [pois, setPois] = useState<Poi[]>([])
   const mapRef = useRef<L.Map | null>(null)
 
+  useEffect(() => {
+    if (!mapRef.current) return
+    // when dynamically loaded, Leaflet may calculate size before the element is
+    // visible; invalidateSize fixes overflow issues
+    setTimeout(() => {
+      mapRef.current?.invalidateSize()
+    }, 100)
+  }, [])
+
   const parcelIcon = L.divIcon({
     html: '<div style="background:#3388ff;border-radius:50%;width:12px;height:12px;border:2px solid white"></div>',
     className: ''
@@ -182,7 +191,7 @@ export default function MapView() {
 
 
   return (
-    <div className="relative">
+    <div className="relative overflow-hidden">
       <MapContainer
         center={[31.7, -6.5]}
         zoom={6}

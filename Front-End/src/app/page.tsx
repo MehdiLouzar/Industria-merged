@@ -7,7 +7,10 @@ import Footer from '@/components/Footer';
 
 export const dynamic = 'force-dynamic';
 
-const MapView = dynamicLib(() => import('@/components/MapView'), { ssr: false });
+const MapView = dynamicLib(() => import('@/components/MapView'), {
+  ssr: false,
+  loading: () => <p>Chargement de la carte...</p>,
+});
 
 export default function Home() {
   return (

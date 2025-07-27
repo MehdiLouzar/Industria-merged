@@ -1,7 +1,7 @@
 "use client";
 
 import { MapContainer, TileLayer, Polygon, Popup } from "react-leaflet";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import proj4 from "proj4";
 import { Button } from "@/components/ui/button";
 import AppointmentForm from "@/components/AppointmentForm";
@@ -34,6 +34,15 @@ interface Zone {
 
 export default function ZoneMap({ zone }: { zone: Zone }) {
   const [selected, setSelected] = useState<Parcel | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    // Ensure Leaflet calculates dimensions correctly when the component mounts
+    setTimeout(() => {
+      mapRef.current?.invalidateSize();
+    }, 100);
+  }, []);
 
   // Use parameters matching EPSG:26191 so parcels align with database values
   const lambertMA =
@@ -152,11 +161,14 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
   };
 
   return (
-    <>
+    <div className="relative overflow-hidden" style={{ height: 350 }}>
       <MapContainer
         center={center}
         zoom={15}
-        style={{ height: 350, width: "100%" }}
+        style={{ height: "100%", width: "100%" }}
+        whenCreated={(m) => {
+          mapRef.current = m
+        }}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <Polygon
@@ -202,6 +214,6 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
       {selected && (
         <AppointmentForm parcel={selected} onClose={() => setSelected(null)} />
       )}
-    </>
+    </div>
   );
 }
