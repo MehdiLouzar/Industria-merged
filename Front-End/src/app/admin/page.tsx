@@ -6,6 +6,7 @@ import { authOptions } from '@/lib/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { fetchApi } from '@/lib/utils';
 import {
   Users,
   MapPin,
@@ -21,16 +22,11 @@ import {
 import Link from 'next/link';
 
 async function getAdminStats() {
-  const base = process.env.NEXT_PUBLIC_API_URL || '';
-  const res = await fetch(`${base}/api/admin/stats`, { 
-    cache: 'no-store',
-    // Ajouter un timeout pour éviter les blocages
-    next: { revalidate: 0 }
-  });
-  if (!res.ok) {
+  const data = await fetchApi('/api/admin/stats');
+  if (!data) {
     throw new Error('Unable to load admin stats');
   }
-  return res.json();
+  return data;
 }
 
 export default async function AdminDashboard() {
@@ -50,6 +46,30 @@ export default async function AdminDashboard() {
       href: '/admin/zones',
       color: 'bg-blue-500',
       permission: ['ADMIN', 'MANAGER']
+    },
+    {
+      title: 'Pays',
+      description: 'Gérer la liste des pays',
+      icon: MapPin,
+      href: '/admin/countries',
+      color: 'bg-lime-500',
+      permission: ['ADMIN']
+    },
+    {
+      title: 'Régions',
+      description: 'Gérer les régions',
+      icon: MapPin,
+      href: '/admin/regions',
+      color: 'bg-emerald-500',
+      permission: ['ADMIN']
+    },
+    {
+      title: 'Types de zone',
+      description: 'Catégories de zones',
+      icon: Factory,
+      href: '/admin/zone-types',
+      color: 'bg-teal-500',
+      permission: ['ADMIN']
     },
     {
       title: 'Gestion des Parcelles',
@@ -79,8 +99,16 @@ export default async function AdminDashboard() {
       title: 'Activités & Équipements',
       description: 'Gérer les types d\'activités et équipements',
       icon: Settings,
-      href: '/admin/config',
+      href: '/admin/activities',
       color: 'bg-red-500',
+      permission: ['ADMIN']
+    },
+    {
+      title: 'Équipements',
+      description: 'Gérer les équipements disponibles',
+      icon: Settings,
+      href: '/admin/amenities',
+      color: 'bg-pink-500',
       permission: ['ADMIN']
     },
     {

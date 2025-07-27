@@ -1,4 +1,5 @@
 import { PrismaClient, UserRole, ZoneStatus, ParcelStatus } from '@prisma/client'
+import { lambertToWGS84 } from '@/lib/coords'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
@@ -119,35 +120,35 @@ async function main() {
       data: {
         name: 'Automobile',
         description: 'Industrie automobile et équipementiers',
-        icon: '🚗',
+        icon: 'car',
       }
     }),
     prisma.activity.create({
       data: {
         name: 'Textile',
         description: 'Textile et confection',
-        icon: '👕',
+        icon: 'shirt',
       }
     }),
     prisma.activity.create({
       data: {
         name: 'Agroalimentaire',
         description: 'Industrie agroalimentaire',
-        icon: '🍎',
+        icon: 'apple',
       }
     }),
     prisma.activity.create({
       data: {
         name: 'Électronique',
         description: 'Composants électroniques',
-        icon: '💻',
+        icon: 'laptop',
       }
     }),
     prisma.activity.create({
       data: {
         name: 'Logistique',
         description: 'Stockage et distribution',
-        icon: '📦',
+        icon: 'package',
       }
     }),
   ])
@@ -160,7 +161,7 @@ async function main() {
       data: {
         name: 'Électricité',
         description: 'Alimentation électrique haute tension',
-        icon: '⚡',
+        icon: 'zap',
         category: 'Infrastructure',
       }
     }),
@@ -168,7 +169,7 @@ async function main() {
       data: {
         name: 'Eau potable',
         description: 'Réseau d\'eau potable',
-        icon: '💧',
+        icon: 'droplet',
         category: 'Infrastructure',
       }
     }),
@@ -176,7 +177,7 @@ async function main() {
       data: {
         name: 'Assainissement',
         description: 'Réseau d\'assainissement',
-        icon: '🚰',
+        icon: 'shower-head',
         category: 'Infrastructure',
       }
     }),
@@ -184,7 +185,7 @@ async function main() {
       data: {
         name: 'Télécommunications',
         description: 'Fibre optique et télécoms',
-        icon: '📡',
+        icon: 'wifi',
         category: 'Infrastructure',
       }
     }),
@@ -192,7 +193,7 @@ async function main() {
       data: {
         name: 'Accès routier',
         description: 'Routes d\'accès et voiries',
-        icon: '🛣️',
+        icon: 'route',
         category: 'Transport',
       }
     }),
@@ -200,7 +201,7 @@ async function main() {
       data: {
         name: 'Sécurité 24h/24',
         description: 'Surveillance et gardiennage',
-        icon: '🛡️',
+        icon: 'shield',
         category: 'Services',
       }
     }),
@@ -218,10 +219,10 @@ async function main() {
         totalArea: 150000, // 15 hectares
         price: 2500,
         status: ZoneStatus.AVAILABLE,
-        latitude: 33.6169,
-        longitude: -7.6149,
         lambertX: 423456.78,
         lambertY: 372890.12,
+        longitude: lambertToWGS84(423456.78, 372890.12)[0],
+        latitude: lambertToWGS84(423456.78, 372890.12)[1],
         zoneTypeId: zoneTypes[0].id,
         regionId: regions[0].id,
       }
@@ -233,11 +234,11 @@ async function main() {
         address: 'Zone Industrielle, Mohammedia',
         totalArea: 200000, // 20 hectares
         price: 1800,
-        status: ZoneStatus.PARTIALLY_OCCUPIED,
-        latitude: 33.6864,
-        longitude: -7.3737,
+        status: ZoneStatus.OCCUPIED,
         lambertX: 445123.45,
         lambertY: 380567.89,
+        longitude: lambertToWGS84(445123.45, 380567.89)[0],
+        latitude: lambertToWGS84(445123.45, 380567.89)[1],
         zoneTypeId: zoneTypes[1].id,
         regionId: regions[0].id,
       }
@@ -250,10 +251,10 @@ async function main() {
         totalArea: 500000, // 50 hectares
         price: 3200,
         status: ZoneStatus.AVAILABLE,
-        latitude: 35.7595,
-        longitude: -5.8340,
         lambertX: 512345.67,
         lambertY: 412789.34,
+        longitude: lambertToWGS84(512345.67, 412789.34)[0],
+        latitude: lambertToWGS84(512345.67, 412789.34)[1],
         zoneTypeId: zoneTypes[0].id,
         regionId: regions[4].id,
       }
@@ -265,11 +266,11 @@ async function main() {
         address: 'Technopolis, Salé',
         totalArea: 80000, // 8 hectares
         price: 4000,
-        status: ZoneStatus.UNDER_DEVELOPMENT,
-        latitude: 34.0209,
-        longitude: -6.8416,
+        status: ZoneStatus.RESERVED,
         lambertX: 467890.23,
         lambertY: 392456.78,
+        longitude: lambertToWGS84(467890.23, 392456.78)[0],
+        latitude: lambertToWGS84(467890.23, 392456.78)[1],
         zoneTypeId: zoneTypes[0].id,
         regionId: regions[1].id,
       }
@@ -283,14 +284,23 @@ async function main() {
 
   // Zone Casablanca Nord - 12 parcelles
   for (let i = 1; i <= 12; i++) {
+    const lambertX = zones[0].lambertX! + (Math.random() - 0.5) * 100
+    const lambertY = zones[0].lambertY! + (Math.random() - 0.5) * 100
+    const [lon, lat] = lambertToWGS84(lambertX, lambertY)
     const parcel = await prisma.parcel.create({
       data: {
         reference: `CAS-${i.toString().padStart(3, '0')}`,
         area: 5000 + Math.random() * 10000, // 5000-15000 m²
         price: 2500,
         status: i <= 8 ? ParcelStatus.AVAILABLE : ParcelStatus.RESERVED,
-        latitude: zones[0].latitude! + (Math.random() - 0.5) * 0.01,
-        longitude: zones[0].longitude! + (Math.random() - 0.5) * 0.01,
+        isFree: true,
+        isShowroom: false,
+        cos: null,
+        cus: null,
+        lambertX,
+        lambertY,
+        longitude: lon,
+        latitude: lat,
         zoneId: zones[0].id,
       }
     })
@@ -299,14 +309,23 @@ async function main() {
 
   // Zone Mohammedia - 15 parcelles
   for (let i = 1; i <= 15; i++) {
+    const px = zones[1].lambertX! + (Math.random() - 0.5) * 100
+    const py = zones[1].lambertY! + (Math.random() - 0.5) * 100
+    const [plon, plat] = lambertToWGS84(px, py)
     const parcel = await prisma.parcel.create({
       data: {
         reference: `MOH-${i.toString().padStart(3, '0')}`,
         area: 8000 + Math.random() * 12000, // 8000-20000 m²
         price: 1800,
         status: i <= 10 ? ParcelStatus.AVAILABLE : ParcelStatus.OCCUPIED,
-        latitude: zones[1].latitude! + (Math.random() - 0.5) * 0.01,
-        longitude: zones[1].longitude! + (Math.random() - 0.5) * 0.01,
+        isFree: true,
+        isShowroom: false,
+        cos: null,
+        cus: null,
+        lambertX: px,
+        lambertY: py,
+        longitude: plon,
+        latitude: plat,
         zoneId: zones[1].id,
       }
     })

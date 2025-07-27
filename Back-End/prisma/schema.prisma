@@ -83,13 +83,14 @@ model Zone {
   price       Float? // prix par m²
   status      ZoneStatus @default(AVAILABLE)
 
-  // Coordonnées géographiques (centroid)
+  // Coordonnées Lambert du centre (premier point)
+  lambertX    Float?
+  lambertY    Float?
+
+  // Coordonnées GPS calculées automatiquement depuis Lambert
   latitude    Float?
   longitude   Float?
 
-  // Coordonnées Lambert (optionnel pour future migration PostGIS)
-  lambertX    Float?
-  lambertY    Float?
 
   // Relations
   zoneTypeId String?
@@ -102,16 +103,19 @@ model Zone {
   parcels    Parcel[]
   activities ZoneActivity[]
   amenities  ZoneAmenity[]
+  vertices   ZoneVertex[]
 
   @@map("zones")
 }
 
 enum ZoneStatus {
   AVAILABLE
+  RESERVED
+  OCCUPIED
+  SHOWROOM
   PARTIALLY_OCCUPIED
   FULLY_OCCUPIED
   UNDER_DEVELOPMENT
-  RESERVED
 }
 
 // Modèle Parcel (Parcelle)
@@ -121,14 +125,17 @@ model Parcel {
   area        Float // en m²
   price       Float? // prix total ou par m²
   status      ParcelStatus @default(AVAILABLE)
+  isFree      Boolean      @default(true)
+  isShowroom  Boolean      @default(false)
+  cos         Float?
+  cus         Float?
 
-  // Coordonnées géographiques
-  latitude    Float?
-  longitude   Float?
-
-  // Coordonnées Lambert
+  // Coordonnées Lambert du point principal
   lambertX    Float?
   lambertY    Float?
+  // Coordonnées GPS calculées automatiquement depuis Lambert
+  latitude    Float?
+  longitude   Float?
 
   // Relations
   zoneId      String
@@ -138,6 +145,7 @@ model Parcel {
   zone         Zone          @relation(fields: [zoneId], references: [id], onDelete: Cascade)
   appointments Appointment[]
   amenities    ParcelAmenity[]
+  vertices     ParcelVertex[]
 
   @@map("parcels")
 }
@@ -268,4 +276,30 @@ model ActivityLog {
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("activity_logs")
+}
+
+model ZoneVertex {
+  id       Int    @id @default(autoincrement())
+  zoneId   String
+  seq      Int
+  lambertX Float
+  lambertY Float
+
+  zone Zone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@unique([zoneId, seq])
+  @@map("zone_vertices")
+}
+
+model ParcelVertex {
+  id       Int    @id @default(autoincrement())
+  parcelId String
+  seq      Int
+  lambertX Float
+  lambertY Float
+
+  parcel Parcel @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+
+  @@unique([parcelId, seq])
+  @@map("parcel_vertices")
 }

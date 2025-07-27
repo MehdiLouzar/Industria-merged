@@ -1,309 +1,223 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Layers, Plus, Minus, RotateCcw, Factory, Warehouse, Truck } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react'
+import Link from 'next/link'
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import L from 'leaflet'
+import MarkerClusterGroup from 'react-leaflet-markercluster'
+import 'leaflet/dist/leaflet.css'
+// react-leaflet-markercluster exposes its CSS via the "styles" export
+import 'react-leaflet-markercluster/styles'
+import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png'
+import iconUrl from 'leaflet/dist/images/marker-icon.png'
+import shadowUrl from 'leaflet/dist/images/marker-shadow.png'
+L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl })
+import { fetchApi } from '@/lib/utils'
+import DynamicIcon from '@/components/DynamicIcon'
+import maplibregl from 'maplibre-gl'
+import '@maplibre/maplibre-gl-leaflet'
+import 'maplibre-gl/dist/maplibre-gl.css'
+import osmtogeojson from 'osmtogeojson'
+import type { FeatureCollection } from 'geojson'
 
-interface Zone {
-  id: string;
-  name: string;
-  type: 'industrial' | 'logistics' | 'freeZone';
-  status: 'available' | 'reserved' | 'occupied';
-  x: number;
-  y: number;
-  count?: number;
+
+type ZoneFeature = {
+  geometry: { type: string; coordinates: [number, number] }
+  properties: {
+    id: string
+    name: string
+    status: string
+    availableParcels: number
+    activityIcons: string[]
+    amenityIcons: string[]
+  }
 }
 
-interface Feature {
-  geometry: { type: string; coordinates: [number, number] };
-  properties: { id: string; name: string; status: string };
+type ParcelFeature = {
+  geometry: { type: string; coordinates: [number, number] }
+  properties: { id: string; reference: string; isShowroom: boolean; status: string }
 }
 
 export default function MapView() {
-  const [selectedZone, setSelectedZone] = useState<Zone | null>(null);
-  const [showLegend, setShowLegend] = useState(true);
-  const [zoom, setZoom] = useState(1);
+  const [zones, setZones] = useState<ZoneFeature[]>([])
+  const [parcels, setParcels] = useState<ParcelFeature[]>([])
+  const mapRef = useRef<L.Map | null>(null)
 
-const [zones, setZones] = useState<Zone[]>([]);
-
-  const mapStatus = (status: string): Zone['status'] => {
-    switch (status) {
-      case 'RESERVED':
-        return 'reserved';
-      case 'FULLY_OCCUPIED':
-        return 'occupied';
-      default:
-        return 'available';
-    }
-  };
+  const parcelIcon = L.divIcon({
+    html: '<div style="background:#3388ff;border-radius:50%;width:12px;height:12px;border:2px solid white"></div>',
+    className: ''
+  })
+  const showroomIcon = L.divIcon({
+    html: '<div style="background:#e53e3e;border-radius:50%;width:12px;height:12px;border:2px solid white"></div>',
+    className: ''
+  })
 
   useEffect(() => {
-    async function loadZones() {
-      const base = process.env.NEXT_PUBLIC_API_URL || '';
-      const res = await fetch(`${base}/api/map/zones`);
-      if (!res.ok) return;
-      const data: { features: Feature[] } = await res.json();
-      const loaded: Zone[] = data.features.map((f) => {
-        const [lon, lat] = f.geometry.coordinates;
-        // Simple transformation to map percentage positions
-        const x = ((lon + 9) / 18) * 100; // longitude range approx -9 to 9
-        const y = ((35 - lat) / 20) * 100; // latitude approx 25-35
-        return {
-          id: f.properties.id,
-          name: f.properties.name,
-          type: 'industrial',
-          status: mapStatus(f.properties.status),
-          x,
-          y,
-          count: undefined,
-        };
-      });
-      setZones(loaded);
-    }
-    loadZones();
-  }, []);
+    fetchApi<{ features: ZoneFeature[] }>("/api/map/zones")
+      .then((d) => {
+        if (!d) return
+        const conv = d.features.map((f) => ({
+          ...f,
+          // convert to [lat, lon] for Leaflet
+          geometry: {
+            type: f.geometry.type,
+            coordinates: [f.geometry.coordinates[1], f.geometry.coordinates[0]],
+          },
+        }))
+        setZones(conv)
+      })
+      .catch(console.error)
+    fetchApi<{ features: ParcelFeature[] }>("/api/map/parcels")
+      .then((d) => {
+        if (!d) return
+        const conv = d.features.map((f) => ({
+          ...f,
+          geometry: {
+            type: f.geometry.type,
+            coordinates: [f.geometry.coordinates[1], f.geometry.coordinates[0]],
+          },
+        }))
+        setParcels(conv)
+      })
+      .catch(console.error)
+  }, [])
 
-  const getZoneIcon = (type: Zone['type']) => {
-    switch (type) {
-      case 'industrial':
-        return Factory;
-      case 'logistics':
-        return Truck;
-      case 'freeZone':
-        return Warehouse;
-      default:
-        return Factory;
-    }
-  };
+  useEffect(() => {
+    if (!mapRef.current) return
+    const gl = (L as any).maplibreGL({
+      style: 'https://demotiles.maplibre.org/style.json',
+      interactive: false,
+    }).addTo(mapRef.current)
+    const map = gl.getMaplibreMap() as maplibregl.Map
 
-  const getZoneColor = (status: Zone['status']) => {
-    switch (status) {
-      case 'available':
-        return 'bg-green-500 hover:bg-green-600';
-      case 'reserved':
-        return 'bg-orange-500 hover:bg-orange-600';
-      case 'occupied':
-        return 'bg-red-500 hover:bg-red-600';
-      default:
-        return 'bg-gray-500 hover:bg-gray-600';
+    const load = () => {
+      if (!mapRef.current) return
+      const b = mapRef.current.getBounds()
+      const bbox = `${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`
+      const query = `[out:json][timeout:25];(
+        way["highway"="motorway"](${bbox});
+        node["railway"="station"](${bbox});
+        node["public_transport"="station"](${bbox});
+        node["harbour"](${bbox});
+        node["aeroway"="aerodrome"](${bbox});
+      );out geom;`
+      fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query))
+        .then(res => res.json())
+        .then(osm => {
+          const geojson = osmtogeojson(osm) as FeatureCollection
+          if (map.getSource('overpass')) {
+            (map.getSource('overpass') as maplibregl.GeoJSONSource).setData(geojson)
+          } else {
+            map.addSource('overpass', { type: 'geojson', data: geojson })
+            map.addLayer({
+              id: 'motorway',
+              type: 'line',
+              source: 'overpass',
+              filter: ['==', 'highway', 'motorway'],
+              paint: { 'line-color': '#0000ff', 'line-width': 20 },
+            })
+            map.addLayer({
+              id: 'stations',
+              type: 'circle',
+              source: 'overpass',
+              filter: ['any', ['==', 'railway', 'station'], ['==', 'public_transport', 'station']],
+              paint: { 'circle-radius': 6, 'circle-color': '#0066ff' },
+            })
+            map.addLayer({
+              id: 'ports',
+              type: 'circle',
+              source: 'overpass',
+              filter: ['has', 'harbour'],
+              paint: { 'circle-radius': 6, 'circle-color': '#333' },
+            })
+            map.addLayer({
+              id: 'airports',
+              type: 'circle',
+              source: 'overpass',
+              filter: ['==', 'aeroway', 'aerodrome'],
+              paint: { 'circle-radius': 6, 'circle-color': '#0a0' },
+            })
+          }
+        })
+        .catch(console.error)
     }
-  };
+    const onLoad = () => {
+      load()
+      mapRef.current?.on('moveend', load)
+    }
+    map.on('load', onLoad)
+    return () => {
+      mapRef.current?.off('moveend', load)
+      map.off('load', onLoad)
+      gl.remove()
+    }
+  }, [])
 
-  const getStatusText = (status: Zone['status']) => {
-    switch (status) {
-      case 'available':
-        return 'Disponible';
-      case 'reserved':
-        return 'Réservé';
-      case 'occupied':
-        return 'Occupé';
-      default:
-        return 'Inconnu';
-    }
-  };
-
-  const getTypeText = (type: Zone['type']) => {
-    switch (type) {
-      case 'industrial':
-        return 'Zone Industrielle';
-      case 'logistics':
-        return 'Parc Logistique';
-      case 'freeZone':
-        return 'Zone Franche';
-      default:
-        return 'Zone';
-    }
-  };
 
   return (
-    <div className="w-full h-[600px] relative bg-blue-50 rounded-lg overflow-hidden border">
-      {/* Map Background */}
-      <div
-        className="w-full h-full relative bg-gradient-to-br from-blue-100 to-blue-200"
-        style={{
-          backgroundImage: `
-            radial-gradient(circle at 20% 50%, rgba(29, 173, 250, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(29, 173, 250, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 40% 80%, rgba(29, 173, 250, 0.1) 0%, transparent 50%)
-          `,
-          transform: `scale(${zoom})`
-        }}
+    <MapContainer
+      center={[31.7, -6.5]}
+      zoom={6}
+      style={{ height: 600, width: '100%' }}
+      whenCreated={(m) => {
+        mapRef.current = m
+      }}
+    >
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <MarkerClusterGroup
+        showCoverageOnHover={false}
+        chunkedLoading
       >
-        {/* Morocco outline simulation */}
-        <div className="absolute inset-0 opacity-20">
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <path
-              d="M15 20 L25 15 L40 12 L60 18 L75 25 L85 35 L80 50 L75 65 L70 75 L60 85 L45 80 L30 75 L20 65 L15 50 Z"
-              fill="none"
-              stroke="#1dadfa"
-              strokeWidth="0.5"
-              className="drop-shadow-sm"
-            />
-          </svg>
-        </div>
-
-        {/* Zone markers */}
-        {zones.map((zone) => {
-          const Icon = getZoneIcon(zone.type);
-          return (
-            <div
-              key={zone.id}
-              className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-200 ${
-                selectedZone?.id === zone.id ? 'scale-125 z-20' : 'z-10'
-              }`}
-              style={{ left: `${zone.x}%`, top: `${zone.y}%` }}
-              onClick={() => setSelectedZone(selectedZone?.id === zone.id ? null : zone)}
-            >
-              <div className={`w-10 h-10 rounded-full ${getZoneColor(zone.status)} flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all`}>
-                <Icon className="w-5 h-5" />
+        {zones.map(z => (
+          <Marker
+            key={z.properties.id}
+            position={z.geometry.coordinates}
+          >
+            <Popup>
+              <div className="space-y-1 text-sm p-1">
+                <strong className="block mb-1">{z.properties.name}</strong>
+                <div>Statut: {z.properties.status}</div>
+                <div>Parcelles disponibles: {z.properties.availableParcels}</div>
+                {z.properties.activityIcons.length > 0 && (
+                  <div className="flex gap-1 text-xl">
+                    {z.properties.activityIcons.map((ic, i) => (
+                      <DynamicIcon key={i} name={ic} className="w-5 h-5" />
+                    ))}
+                  </div>
+                )}
+                {z.properties.amenityIcons.length > 0 && (
+                  <div className="flex gap-1 text-xl">
+                    {z.properties.amenityIcons.map((ic, i) => (
+                      <DynamicIcon key={i} name={ic} className="w-5 h-5" />
+                    ))}
+                  </div>
+                )}
+                <Link
+                  href={`/zones/${z.properties.id}`}
+                  className="text-blue-600 underline block mt-1"
+                >
+                  Voir la zone
+                </Link>
               </div>
-              {zone.count && (
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                  {zone.count}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Map Controls */}
-      <div className="absolute top-4 left-4 space-y-2">
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => setZoom(Math.min(zoom + 0.2, 2))}
-        >
-          <Plus className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => setZoom(Math.max(zoom - 0.2, 0.5))}
-        >
-          <Minus className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => setZoom(1)}
-        >
-          <RotateCcw className="w-4 h-4" />
-        </Button>
-      </div>
-
-      {/* Legend Toggle */}
-      <div className="absolute top-4 right-4">
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => setShowLegend(!showLegend)}
-        >
-          <Layers className="w-4 h-4 mr-2" />
-          Légende
-        </Button>
-      </div>
-
-      {/* Legend */}
-      {showLegend && (
-        <Card className="absolute top-16 right-4 w-64">
-          <CardContent className="p-4">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-red-600" />
-              Légende des Zones
-            </h3>
-
-            <div className="space-y-3">
-              <div>
-                <h4 className="text-sm font-medium mb-2">Types de Zones</h4>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Factory className="w-4 h-4 text-gray-600" />
-                    <span>Zones Industrielles</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Truck className="w-4 h-4 text-gray-600" />
-                    <span>Parcs Logistiques</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Warehouse className="w-4 h-4 text-gray-600" />
-                    <span>Zones Franches</span>
-                  </div>
-                </div>
+            </Popup>
+          </Marker>
+        ))}
+        {parcels.map(p => (
+          <Marker
+            key={p.properties.id}
+            position={p.geometry.coordinates}
+            icon={p.properties.isShowroom ? showroomIcon : parcelIcon}
+          >
+            <Popup>
+              <div className="space-y-1 text-sm">
+                <strong>{p.properties.reference}</strong>
+                <div>Statut: {p.properties.status}</div>
+                {p.properties.isShowroom && <div>Showroom</div>}
               </div>
-
-              <div>
-                <h4 className="text-sm font-medium mb-2">États des Parcelles</h4>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 text-sm">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span>Disponible</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                    <span>Réservé</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <span>Occupé</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Zone Details Popup */}
-      {selectedZone && (
-        <Card className="absolute bottom-4 left-4 w-80">
-          <CardContent className="p-4">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="font-semibold text-lg">{selectedZone.name}</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedZone(null)}
-              >
-                ×
-              </Button>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline">{getTypeText(selectedZone.type)}</Badge>
-                <Badge className={getZoneColor(selectedZone.status).replace('bg-', 'bg-').replace('hover:bg-', '')}>
-                  {getStatusText(selectedZone.status)}
-                </Badge>
-              </div>
-
-              {selectedZone.count && (
-                <p className="text-sm text-gray-600">
-                  {selectedZone.count} parcelles disponibles
-                </p>
-              )}
-
-              <div className="flex gap-2 mt-3">
-                <Button size="sm" className="header-red text-white">
-                  Voir Détails
-                </Button>
-                <Button variant="outline" size="sm">
-                  Réserver
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Zone count display */}
-      <div className="absolute bottom-4 right-4">
-        <Badge variant="secondary" className="text-sm">
-          {zones.reduce((acc, zone) => acc + (zone.count || 0), 0)} zones disponibles
-        </Badge>
-      </div>
-    </div>
-  );
+            </Popup>
+          </Marker>
+        ))}
+      </MarkerClusterGroup>
+    </MapContainer>
+  )
 }
