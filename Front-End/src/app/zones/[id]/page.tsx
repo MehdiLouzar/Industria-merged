@@ -33,7 +33,7 @@ interface Zone {
   region?: { name: string } | null;
   zoneType?: { name: string } | null;
   activities?: { activity: { name: string } }[];
-  amenities?: { amenity: { name: string } }[];
+  amenities?: { amenity: { name: string; icon?: string } }[];
   parcels: Parcel[];
   vertices?: { seq: number; lambertX: number; lambertY: number; lat?: number; lon?: number }[];
 }
@@ -73,14 +73,23 @@ export default function ZonePage() {
               {zone.activities.map((a) => a.activity.name).join(", ")}
             </p>
           )}
-          {zone.amenities && zone.amenities.length > 0 && (
-            <p>
-              Équipements:{" "}
-              {zone.amenities.map((a) => a.amenity.name).join(", ")}
-            </p>
-          )}
         </CardContent>
         </Card>
+        {zone.amenities && zone.amenities.length > 0 && (
+          <div className="border rounded-lg p-4 space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold">Equipements de proximité</span>
+            </div>
+            <div className="flex flex-wrap gap-4">
+              {zone.amenities.map((a, i) => (
+                <div key={i} className="flex flex-col items-center text-sm">
+                  <span className="text-2xl">{a.amenity.icon}</span>
+                  <span>{a.amenity.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="text-right">
           <Button onClick={() => setShowForm(true)}>Prendre rendez-vous</Button>
         </div>
