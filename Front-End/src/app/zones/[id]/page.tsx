@@ -72,6 +72,11 @@ export default function ZonePage() {
           {zone.zoneType?.name && <p>Type: {zone.zoneType.name}</p>}
           {zone.totalArea && <p>Superficie: {zone.totalArea} m²</p>}
           {zone.price && <p>Prix: {zone.price} DH/m²</p>}
+          {zone.latitude != null && zone.longitude != null && (
+            <p>
+              Coordonnées: {zone.latitude.toFixed(5)}, {zone.longitude.toFixed(5)}
+            </p>
+          )}
           {zone.activities && zone.activities.length > 0 && (
             <p>
               Activités:{" "}

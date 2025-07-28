@@ -179,6 +179,11 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
             <div className="space-y-1 text-sm">
               <strong>{zone.name}</strong>
               <div>Statut: {zone.status}</div>
+              {zone.latitude != null && zone.longitude != null && (
+                <div>
+                  Lat: {zone.latitude.toFixed(5)}, Lon: {zone.longitude.toFixed(5)}
+                </div>
+              )}
             </div>
           </Popup>
         </Polygon>
@@ -196,6 +201,11 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
                     {p.area && <div>Surface: {p.area} m²</div>}
                     {p.price && <div>Prix: {p.price} DH</div>}
                     <div>Statut: {p.status}</div>
+                    {p.latitude != null && p.longitude != null && (
+                      <div>
+                        Lat: {p.latitude.toFixed(5)}, Lon: {p.longitude.toFixed(5)}
+                      </div>
+                    )}
                     {p.status === "AVAILABLE" && p.isFree && (
                       <Button
                         size="sm"

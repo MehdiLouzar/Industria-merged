@@ -250,6 +250,10 @@ export default function MapView() {
                 <strong className="block mb-1">{z.properties.name}</strong>
                 <div>Statut: {z.properties.status}</div>
                 <div>Parcelles disponibles: {z.properties.availableParcels}</div>
+                <div>
+                  Lat: {z.geometry.coordinates[0].toFixed(5)}, Lon:{' '}
+                  {z.geometry.coordinates[1].toFixed(5)}
+                </div>
                 {z.properties.activityIcons.length > 0 && (
                   <div className="flex gap-1 text-xl">
                     {z.properties.activityIcons.map((ic, i) => (
@@ -284,6 +288,10 @@ export default function MapView() {
               <div className="space-y-1 text-sm">
                 <strong>{p.properties.reference}</strong>
                 <div>Statut: {p.properties.status}</div>
+                <div>
+                  Lat: {p.geometry.coordinates[0].toFixed(5)}, Lon:{' '}
+                  {p.geometry.coordinates[1].toFixed(5)}
+                </div>
                 {p.properties.isShowroom && <div>Showroom</div>}
               </div>
             </Popup>
