@@ -2,12 +2,34 @@
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
 import dynamicLib from 'next/dynamic';
+import React from 'react';
 import ZoneGrid from '@/components/ZoneGrid';
 import Footer from '@/components/Footer';
 
 export const dynamic = 'force-dynamic';
 
-const MapView = dynamicLib(() => import('@/components/MapView'), { ssr: false });
+const MapViewLazy = dynamicLib(() => import('@/components/MapView'), {
+  ssr: false,
+  loading: () => <p>Chargement de la carte...</p>,
+});
+
+function LazyMapView() {
+  const ref = React.useRef<HTMLDivElement | null>(null)
+  const [show, setShow] = React.useState(false)
+
+  React.useEffect(() => {
+    const obs = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setShow(true)
+        obs.disconnect()
+      }
+    }, { rootMargin: '200px' })
+    if (ref.current) obs.observe(ref.current)
+    return () => obs.disconnect()
+  }, [])
+
+  return <div ref={ref} style={{ minHeight: 600 }}>{show && <MapViewLazy />}</div>
+}
 
 export default function Home() {
   return (
@@ -44,7 +66,7 @@ export default function Home() {
             </p>
           </div>
 
-          <MapView />
+          <LazyMapView />
         </div>
       </section>
 

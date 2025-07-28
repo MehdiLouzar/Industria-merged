@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import ZoneMap from "@/components/ZoneMap";
+import dynamic from "next/dynamic";
+const ZoneMap = dynamic(() => import("@/components/ZoneMap"), {
+  ssr: false,
+  loading: () => <p>Chargement de la carte...</p>,
+});
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AppointmentForm from "@/components/AppointmentForm";
@@ -68,6 +72,11 @@ export default function ZonePage() {
           {zone.zoneType?.name && <p>Type: {zone.zoneType.name}</p>}
           {zone.totalArea && <p>Superficie: {zone.totalArea} m²</p>}
           {zone.price && <p>Prix: {zone.price} DH/m²</p>}
+          {zone.latitude != null && zone.longitude != null && (
+            <p>
+              Coordonnées: {zone.latitude.toFixed(5)}, {zone.longitude.toFixed(5)}
+            </p>
+          )}
           {zone.activities && zone.activities.length > 0 && (
             <p>
               Activités:{" "}

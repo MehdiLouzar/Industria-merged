@@ -1,7 +1,7 @@
 "use client";
 
 import { MapContainer, TileLayer, Polygon, Popup } from "react-leaflet";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import proj4 from "proj4";
 import { Button } from "@/components/ui/button";
 import AppointmentForm from "@/components/AppointmentForm";
@@ -34,6 +34,15 @@ interface Zone {
 
 export default function ZoneMap({ zone }: { zone: Zone }) {
   const [selected, setSelected] = useState<Parcel | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    // Ensure Leaflet calculates dimensions correctly when the component mounts
+    setTimeout(() => {
+      mapRef.current?.invalidateSize();
+    }, 100);
+  }, []);
 
   // Use parameters matching EPSG:26191 so parcels align with database values
   const lambertMA =
@@ -152,11 +161,14 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
   };
 
   return (
-    <>
+    <div className="relative overflow-hidden" style={{ height: 350 }}>
       <MapContainer
         center={center}
         zoom={15}
-        style={{ height: 350, width: "100%" }}
+        style={{ height: "100%", width: "100%" }}
+        whenCreated={(m) => {
+          mapRef.current = m
+        }}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <Polygon
@@ -167,6 +179,11 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
             <div className="space-y-1 text-sm">
               <strong>{zone.name}</strong>
               <div>Statut: {zone.status}</div>
+              {zone.latitude != null && zone.longitude != null && (
+                <div>
+                  Lat: {zone.latitude.toFixed(5)}, Lon: {zone.longitude.toFixed(5)}
+                </div>
+              )}
             </div>
           </Popup>
         </Polygon>
@@ -184,6 +201,11 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
                     {p.area && <div>Surface: {p.area} m²</div>}
                     {p.price && <div>Prix: {p.price} DH</div>}
                     <div>Statut: {p.status}</div>
+                    {p.latitude != null && p.longitude != null && (
+                      <div>
+                        Lat: {p.latitude.toFixed(5)}, Lon: {p.longitude.toFixed(5)}
+                      </div>
+                    )}
                     {p.status === "AVAILABLE" && p.isFree && (
                       <Button
                         size="sm"
@@ -202,6 +224,6 @@ export default function ZoneMap({ zone }: { zone: Zone }) {
       {selected && (
         <AppointmentForm parcel={selected} onClose={() => setSelected(null)} />
       )}
-    </>
+    </div>
   );
 }

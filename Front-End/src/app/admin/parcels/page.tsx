@@ -54,6 +54,8 @@ interface ParcelForm {
   cus: string
   lambertX: string
   lambertY: string
+  latitude: string
+  longitude: string
   zoneId: string
   vertices: { lambertX: string; lambertY: string }[]
 }
@@ -81,6 +83,8 @@ export default function ParcelsAdmin() {
 
     lambertX: '',
     lambertY: '',
+    latitude: '',
+    longitude: '',
     zoneId: '',
     vertices: [],
   })
@@ -176,6 +180,8 @@ export default function ParcelsAdmin() {
       cus: form.cus ? parseFloat(form.cus) : undefined,
       lambertX: form.lambertX ? parseFloat(form.lambertX) : undefined,
       lambertY: form.lambertY ? parseFloat(form.lambertY) : undefined,
+      latitude: form.latitude ? parseFloat(form.latitude) : undefined,
+      longitude: form.longitude ? parseFloat(form.longitude) : undefined,
       zoneId: form.zoneId,
       vertices: form.vertices.map((v, i) => ({
         seq: i,
@@ -210,6 +216,8 @@ export default function ParcelsAdmin() {
       cus: '',
       lambertX: '',
       lambertY: '',
+      latitude: '',
+      longitude: '',
       zoneId: '',
       vertices: [],
     })
@@ -231,6 +239,8 @@ export default function ParcelsAdmin() {
       cus: it.cus?.toString() ?? '',
       lambertX: it.lambertX?.toString() ?? '',
       lambertY: it.lambertY?.toString() ?? '',
+      latitude: it.latitude?.toString() ?? '',
+      longitude: it.longitude?.toString() ?? '',
       zoneId: it.zoneId,
       vertices: it.vertices ? it.vertices.sort((a,b)=>a.seq-b.seq).map(v=>({
         lambertX: v.lambertX.toString(),
@@ -258,6 +268,8 @@ export default function ParcelsAdmin() {
       cus: '',
       lambertX: '',
       lambertY: '',
+      latitude: '',
+      longitude: '',
       zoneId: '',
       vertices: [],
     })
@@ -338,6 +350,16 @@ export default function ParcelsAdmin() {
               <div>
                 <Label htmlFor="lambertY">Lambert Y</Label>
                 <Input id="lambertY" name="lambertY" value={form.lambertY} onChange={handleChange} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="latitude">Latitude</Label>
+                <Input id="latitude" name="latitude" value={form.latitude} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="longitude">Longitude</Label>
+                <Input id="longitude" name="longitude" value={form.longitude} onChange={handleChange} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
