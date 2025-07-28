@@ -53,6 +53,8 @@ interface ZoneForm {
   status: string
   lambertX: string
   lambertY: string
+  latitude: string
+  longitude: string
   zoneTypeId: string
   regionId: string
   activityIds: string[]
@@ -89,6 +91,8 @@ export default function ZonesAdmin() {
 
     lambertX: '',
     lambertY: '',
+    latitude: '',
+    longitude: '',
     zoneTypeId: '',
     regionId: '',
     activityIds: [],
@@ -213,6 +217,8 @@ export default function ZonesAdmin() {
       status: form.status,
       lambertX: form.lambertX ? parseFloat(form.lambertX) : undefined,
       lambertY: form.lambertY ? parseFloat(form.lambertY) : undefined,
+      latitude: form.latitude ? parseFloat(form.latitude) : undefined,
+      longitude: form.longitude ? parseFloat(form.longitude) : undefined,
       zoneTypeId: form.zoneTypeId || undefined,
       regionId: form.regionId || undefined,
       activityIds: form.activityIds,
@@ -246,6 +252,8 @@ export default function ZonesAdmin() {
       status: 'AVAILABLE',
       lambertX: '',
       lambertY: '',
+      latitude: '',
+      longitude: '',
       zoneTypeId: '',
       regionId: '',
       activityIds: [],
@@ -268,6 +276,8 @@ export default function ZonesAdmin() {
       status: z.status,
       lambertX: z.lambertX?.toString() ?? '',
       lambertY: z.lambertY?.toString() ?? '',
+      latitude: z.latitude?.toString() ?? '',
+      longitude: z.longitude?.toString() ?? '',
       zoneTypeId: z.zoneTypeId || '',
       regionId: z.regionId || '',
       activityIds: z.activities ? z.activities.map(a => a.activityId) : [],
@@ -297,6 +307,8 @@ export default function ZonesAdmin() {
       status: 'AVAILABLE',
       lambertX: '',
       lambertY: '',
+      latitude: '',
+      longitude: '',
       zoneTypeId: '',
       regionId: '',
       activityIds: [],
@@ -388,6 +400,16 @@ export default function ZonesAdmin() {
               <div>
                 <Label htmlFor="lambertY">Lambert Y</Label>
                 <Input id="lambertY" name="lambertY" value={form.lambertY} onChange={handleChange} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="latitude">Latitude</Label>
+                <Input id="latitude" name="latitude" value={form.latitude} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="longitude">Longitude</Label>
+                <Input id="longitude" name="longitude" value={form.longitude} onChange={handleChange} />
               </div>
             </div>
             <div>
